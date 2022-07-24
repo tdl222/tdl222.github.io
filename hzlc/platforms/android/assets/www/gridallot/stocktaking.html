@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            padding-top: 70px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    </style>
+<title>快捷盘点</title>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>快捷盘点</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+<div id="content">
+    <form role="form" id="quickCreateform">
+        <input id="grid_allot_id" name="grid_allot_id" class="hidden"/>
+        <input id="grid_no" class="form-control" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='') batchno0()" placeholder="货架位" style="margin-bottom:10px;"/>
+        <label>批次号：</label><select id="batch_no0" class="form-control select select-default" data-toggle="select" onchange="gettgridallot()"></select>
+        <table class="table table-striped table-condensed">
+            <tr>
+                <td width="80px">商品名称</td>
+                <td><div id="item_name">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>条形码</td>
+                <td><div id="bar_code">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>规格</td>
+                <td><div id="t_model">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>批次号</td>
+                <td><div id="batch_no">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>保管区分</td>
+                <td><div id="keeptype">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>状态</td>
+                <td><div id="status">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>海关国检</td>
+                <td><div id="check_status">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>库存数</td>
+                <td><div id="cur_quan">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td>盘点数</td>
+                <td><input id="taking_qty" name="taking_qty" class="form-control" size="20" maxlength="5" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='') quickCreate()"/></td>
+            </tr>
+        </table>
+            <input type="button" id="quickCreatebtn" class="btn btn-lg btn-primary btn-block disabled" onclick="quickCreate()" value="盘点"/>
+        <!--<a href="#" id="quickCreatebtn" class="btn btn-lg btn-block disabled" onclick="quickCreate()">盘点</a>-->
+    </form>
+</div>
+
+    <script>
+        $(function($) {
+            $('#grid_no').focus();
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+        });
+        
+        function batchno0(){
+        	if($('#grid_no').val().substr(0,1)=='T'){
+        		my_alert("临时区不能盘点！");
+        		$('#grid_no').val('');
+        		return;
+        	}
+    		$.post(ctx() + 'gridallot/queryList',{'rows':50,'page':1,'wh_id':localStorage.getItem('wh_id'),'grid_no':$('#grid_no').val()},
+    			function(data) {
+                    checklogin(data);
+                    if(data.rows.length==0){
+                        new $.Zebra_Dialog('无数据', {'title': '提示'});
+                        tab_clear();
+                        return;
+                    }
+                    $("#batch_no0").empty();
+                    $.each(data.rows,function(n,row)
+                    {
+                        $("#batch_no0").append("<option value='"+row['batch_no']+"' >"+row['batch_no']+"</option>");
+                    });
+                    $("#batch_no0").val($('#batch_no0 option:first').val()); 
+                    $('[data-toggle="select"]').select2();
+                	gettgridallot();
+    		});
+    	}
+        
+        function gettgridallot(){
+            $.post(ctx()+'gridallot/getTgridallot',{'wh_id':localStorage.getItem('wh_id'),'grid_no':$('#grid_no').val(),'itemsRegi.bar_code':'','batch_no':$('#batch_no0').val()},function(data) {
+                checklogin(data);
+                if(!data['grid_allot_id']){
+                    new $.Zebra_Dialog('无数据', {'title': '提示'});
+                    tab_clear();
+                    return;
+                }
+                $("#item_name").html(data['itemsRegi']['item_name']);
+                $("#bar_code").html('&nbsp;'+data['itemsRegi']['item_code']);
+                $("#t_model").html('&nbsp;'+(data['itemsRegi']['t_model']==null?'-':data['itemsRegi']['t_model']));
+                $("#batch_no").html('&nbsp;'+data['batch_no']);
+                if(data['status']=='01'){
+                    $("#status").html('&nbsp;'+'正常');
+                    $('#quickCreatebtn').removeClass('disabled').addClass('btn-inverse');
+                    $('#taking_qty').focus();
+                }else if(data['status']=='02'){
+                    $("#status").html('&nbsp;'+'盘点中');
+                }
+                if(data['check_status']=='0'){
+                    $("#check_status").html('&nbsp;'+'解锁');
+                }else if(data['status']=='1'){
+                    $("#check_status").html('&nbsp;'+'锁定');
+                }
+                $("#cur_quan").html('&nbsp;'+data['cur_quan']);
+                $("#keeptype").html('&nbsp;'+data['keeptypename']);
+                $('#grid_allot_id').val(data['grid_allot_id']);
+            });
+        }
+        function quickCreate(){
+           if(!$('#taking_qty').val()){
+               $('#taking_qty').focus();
+               return;
+           }
+            $.post(ctx()+'stocktaking/quickCreate',$("#quickCreateform").serializeArray(),function(data) {
+                if(data.mes=='duplicatekey'){
+                    new $.Zebra_Dialog('违反唯一条件约束', {'type':'error','title':'错误'});
+                    playErrorAudio();
+                }else if (data.mes=='fail') {
+                    new $.Zebra_Dialog('系统异常', {'type':'error','title': '错误'});
+                    playErrorAudio();
+                }else{
+                    $('#grid_no').html('&nbsp;');
+                    $('#item_name').html('&nbsp;');
+                    $('#bar_code').html('&nbsp;');
+                    $('#t_model').html('&nbsp;');
+                    $('#batch_no').html('&nbsp;');
+                    $('#status').html('&nbsp;');
+                    $("#keeptype").html('&nbsp;');
+                    $('#check_status').html('&nbsp;');
+                    $('#cur_quan').html('&nbsp;');
+                    $('#taking_qty').val('');
+                    $('#grid_no').val('');
+                    $('#grid_no').focus();
+                    $('#quickCreatebtn').removeClass('btn-inverse').addClass('disabled');
+                    playSuccessAudio();
+                }
+            });     
+        }
+        $(document).ready(function($){
+	        $("input").click(function(){
+	                $(this).select();
+	        });
+    	});
+        function tab_clear(){
+            $('#item_name').html('');
+            $('#bar_code').html('');
+            $('#t_model').html('');
+            $('#batch_no').html('');
+            $('#keeptype').html('');
+            $('#status').html('');
+            $('#check_status').html('');
+            $('#cur_quan').html('');
+        }
+    </script>
+</body>
+</html>

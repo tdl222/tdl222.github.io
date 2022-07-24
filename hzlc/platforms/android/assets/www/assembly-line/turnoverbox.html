@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        .check_num_input{
+            width: 30px;
+            vertical-align:middle;
+            text-align: right;
+        }
+        body{
+            padding-top: 70px;
+            padding-bottom: 150px;
+        }
+        .tr-selected{
+            background-color: aqua;
+        }
+        #add_edit_div{
+            padding: 15px;
+        }
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+    </style>
+<title>周转箱</title>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>周转箱</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+<div id="list-div">
+    <form role="form">
+        <input id="turnoverbox_no" class="form-control" onKeyDown="down_enter()" placeholder="周转箱编号" style="margin-bottom:10px;"/>
+        <select id="turnoverbox_status" class="form-control select select-default" data-toggle="select" onchange="v_pageNo=1;query()">
+            <option value="" selected>全部</option>
+            <option value="00">未派送</option>
+            <option value="01">已派送</option>
+        </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-primary" onclick="query()"><span class="fui-search"></span>查询
+        </button>
+    </form>
+    <div style="margin-bottom:10px;" id="turnoverbox_tb"></div>
+        <button type="button" class="btn btn-primary btn-sm pull-right" onclick="unBindSortTurnoverbox()" style="margin-right:2px;">释放
+        </button>
+        <button type="button" class="btn btn-primary btn-sm pull-right" onclick="deleteSortTurnoverboxRow()" style="margin-right:2px;">删除
+        </button>
+        <button type="button" class="btn btn-primary btn-sm pull-right" onclick="openaddedit('edit')" style="margin-right:2px;">更新
+        </button>
+        <button type="button" class="btn btn-primary btn-sm pull-right" onclick="openaddedit('add')" style="margin-right:2px;">新增
+        </button>
+    <div style="min-height:300px;">
+        
+        <table class="table table-condensed">
+            <thead>
+                <td>周转箱编号</td><td>长(cm)</td>
+                <td>宽(cm)</td><td>高(cm)</td><td>状态</td>
+            </thead>
+            <tbody id="turnoverbox_tbody"></tbody>
+        </table>
+    </div>
+        <div class="pager-div navbar-fixed-bottom">
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>
+        </div>
+</div>
+<div class="hidden" id="add_edit_div">
+<form class="form-horizontal" role="form" id="sortTurnoverboxForm">
+    <input class="hidden" name="sort_turnoverbox_id" id="sort_turnoverbox_id">
+    <input class="hidden" name="wh_id" id="wh_id">
+   <div class="form-group">
+      <div class="col-sm-4 col-xs-4">编号</div>
+      <div class="col-sm-8 col-xs-8">
+         <input type="text" class="form-control" id="turnoverbox_no1" name="turnoverbox_no" 
+             placeholder="编号">
+      </div>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-4 col-xs-4">长(cm)</div>
+      <div class="col-sm-8 col-xs-8">
+         <input type="text" class="form-control" id="turnoverbox_long" name="turnoverbox_long" precision="2" onkeyup="num_format(this)" onclick="num_onclick(this)" maxlength="7"
+             placeholder="长(cm)">
+      </div>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-4 col-xs-4">宽(cm)</div>
+      <div class="col-sm-8 col-xs-8">
+         <input type="text" class="form-control" id="turnoverbox_width" name="turnoverbox_width" precision="2" maxlength="7"
+             placeholder="宽(cm)">
+      </div>
+   </div>
+   <div class="form-group">
+      <div class="col-sm-4 col-xs-4">高(cm)</div>
+      <div class="col-sm-8 col-xs-8">
+         <input type="text" class="form-control" id="turnoverbox_high" name="turnoverbox_high" precision="2" maxlength="7"
+             placeholder="高(cm)">
+      </div>
+   </div>
+          <div class="clearfix line-div">
+              <div class="col-xs-6 col-sm-6">
+                  <button type="button" class="btn btn-lg btn-primary btn-block" onClick="save()">保存</button>
+              </div>
+              <div class="col-xs-6 col-sm-6">
+                  <button type="button" class="btn btn-lg btn-primary btn-block" onClick="closeaddedit()">取消</button>
+              </div>
+          </div>
+</form>
+</div>
+    <script>
+        $(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            $('#turnoverbox_no').focus();
+            query();
+        });
+    var v_pageSize=20;
+	var v_pageNo=1;
+    var v_turnoverbox_no;
+    var v_sort_turnoverbox_id;
+function previous(){
+        if($("#previousbtn").hasClass("disabled")){
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1){
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query();
+	}
+	function next(){
+        if($("#nextbtn").hasClass("disabled")){
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML)){
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query();
+	}
+    btnctrl();
+    function down_enter(){
+    	if(event.keyCode=='13'&& $('#qry_exception_logistics_no').val()!=''){
+    		v_pageNo=1;
+    		query();
+    	}
+    }
+        function query(){
+            $('#turnoverbox_tbody').html('&nbsp;');
+            $.post(ctx()+'sortturnoverbox/queryList', 
+                {
+                    'turnoverbox_no':$('#turnoverbox_no').val(),
+                    'turnoverbox_status':$('#turnoverbox_status').val(),
+                    'rows':v_pageSize,
+                    'page':v_pageNo
+                }, 
+                function(data) {
+                    checklogin(data);
+                    if(data.rows.length==0){
+                    	$('.pager-div').css('display','none');
+                    	my_alert('无数据');
+                    	return;
+                    }
+                    $('.pager-div').css('display','block');
+                    var str="";
+                    $.each( data.rows, function(i, row){
+                        str += '<tr data-id="'+row['sort_turnoverbox_id']+'">';
+                        str += '<td>'+row['turnoverbox_no']+'</td>';
+                        str += '<td>'+row['turnoverbox_long']+'</td>';
+                        str += '<td>'+row['turnoverbox_width']+'</td>';
+                        str += '<td>'+row['turnoverbox_high']+'</td>';
+                        str += '<td>'+row['status_name']+'</td>';
+                        str += '</tr>';
+                    }); 
+                    $('#turnoverbox_tbody').html(str);
+                    var vt=parseInt(data.total);
+                    vt=Math.ceil(vt/v_pageSize);
+                    document.getElementById("totalpagenospan").innerHTML=vt;
+                    if(v_pageNo>parseInt(data.total)){
+                        document.getElementById("pagenospan").innerHTML=vt;
+                    }else{
+                        document.getElementById("pagenospan").innerHTML=v_pageNo;
+                    }
+                    btnctrl();
+              });
+            v_turnoverbox_no=undefined;
+        }
+        $(document).on("click","tbody tr",function(){
+            $.each($("tr"), function(i, v_tr){
+                $(v_tr).removeClass('tr-selected');
+            });
+            $(this).addClass('tr-selected');
+            v_turnoverbox_no=$(this).children(":first").html();
+            v_sort_turnoverbox_id=$(this).context.dataset.id;
+        });
+		function unBindSortTurnoverbox1(){
+            $.post(ctx() + 'sortturnoverbox/unbindbox?turnoverbox_no=' + v_turnoverbox_no, function(data) {
+                if(data.code=='fail'){
+                    my_alert(data.mes);;
+                }else{
+                    query();
+                }
+            });
+        }
+		function unBindSortTurnoverbox(){
+            if(!v_turnoverbox_no){
+                my_alert("请选择要释放的周转箱");
+                return; 
+            }
+            if($("tr:contains('"+v_turnoverbox_no+"')").html().indexOf("未派送")>=0){
+                my_alert("该周转箱未派送");
+                return;
+            }
+			my_confirm('确定要释放吗?', 'unBindSortTurnoverbox1');
+		}
+		//删除
+        function deleteSortTurnoverboxRow() {
+            if(!v_turnoverbox_no){
+                my_alert("请选择要删除的周转箱");
+                return; 
+            }
+            if($("tr:contains('"+v_turnoverbox_no+"')").html().indexOf("派送中")>=0){
+                my_alert("周转箱派送中，无法删除");
+
+                return;
+            }
+			my_confirm('确定要删除吗?', 'deleteSortTurnoverboxRow1');
+        }
+		function deleteSortTurnoverboxRow1() {
+            $.post(ctx() + 'sortturnoverbox/delete?turnoverbox_id=' + v_sort_turnoverbox_id, function(data) {
+                if(data.code=='fail'){
+                    return false;
+                    my_alert(data.mes);
+                }
+                query();
+            });
+        }
+        function openaddedit(option){
+            $('#sortTurnoverboxForm')[0].reset();
+            $('#wh_id').val(localStorage.getItem('wh_id'));
+            if(option=='add'){
+                $('#sort_turnoverbox_id').val('');
+            }else{
+                var v_row=$("tr:contains('"+v_turnoverbox_no+"')");
+                $('#turnoverbox_no1').val(v_row.children(0).html());
+                $('#turnoverbox_long').val(v_row.children()[1].innerHTML);
+                $('#turnoverbox_width').val(v_row.children()[2].innerHTML);
+                $('#turnoverbox_high').val(v_row.children()[3].innerHTML);
+                $('#sort_turnoverbox_id').val(v_sort_turnoverbox_id);
+            }
+            $('#list-div').addClass('hidden');
+            $('#add_edit_div').removeClass('hidden');
+        }
+        function closeaddedit(){
+            $('#list-div').removeClass('hidden');
+            $('#add_edit_div').addClass('hidden');
+        }
+		function save() {
+            var option="add";
+            if($('#sort_turnoverbox_id').val()!=''){
+                option="update";
+            }
+			$.post(ctx() + "sortturnoverbox/"+option,
+            $("#sortTurnoverboxForm").serializeArray(), function(data) {
+                if (data.code == 'fail') {
+                    my_alert(data.mes);;
+                }
+                closeaddedit();
+                query();
+            });
+		}
+        function num_format(obj){
+            v_num=$(obj).val().replace(/[^\d.]/g,'');
+            var n=(v_num.split('.')).length-1;
+            if(n>1||(n==1&&v_num.substring(v_num.indexOf('.'),v_num.length).length>3)){
+                $(obj).val(v_number);
+            }else{
+                $(obj).val(v_num);
+               v_number=v_num;
+            }
+        }
+        var v_number;
+        function num_onclick(obj){
+            v_number=$(obj).val();
+        }
+        $(document).ready(function(){
+	    	$("input").click(function(){
+	    		$(this).select();
+	    	});
+   		});
+    </script>
+</body>
+</html>

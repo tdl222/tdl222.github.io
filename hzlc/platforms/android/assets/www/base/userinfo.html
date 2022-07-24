@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <title>账户</title>
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+      <style>
+          .div-dt{
+              width:70px;
+          }
+          .div-dd{
+              min-width:150px;
+          }
+          .line-div{
+              padding-bottom: 10px;
+          }
+          body{
+          	margin:5px;
+          }
+      </style>
+  </head>
+
+  <body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="main.html"><span class="fui-arrow-left"></span>用户信息</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/><br/>
+      <div id="infodiv">
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">用&nbsp;&nbsp;户&nbsp;&nbsp;名</div>
+                <div id="dd1" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">真实姓名</div>
+                <div id="dd2" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">用户类型</div>
+                <div id="dd3" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别</div>
+                <div id="dd4" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;话</div>
+                <div id="dd5" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">工&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作</div>
+                <div id="dd6" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">学&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;历</div>
+                <div id="dd7" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">入职日期</div>
+                <div id="dd8" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">生&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日</div>
+                <div id="dd9" class="pull-left div-dd">&nbsp;</div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址</div>
+                <div id="dd10" class="pull-left div-dd">&nbsp;</div>
+            </div>
+    <a type="button" id="updatepwdbtn" class="btn btn-lg btn-primary btn-block" onclick="updatepwdbtnonclick()" >修改</a>
+      </div>
+
+    <div id="editdiv" class="hidden">
+      <form role="form" id="editinfoform">
+            <input name="user_id" id="user_id" class="hidden"/>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">用&nbsp;&nbsp;户&nbsp;&nbsp;名</div>
+                <div id="dd1" class="pull-left div-dd">
+                    <input class="form-control" name="user_cd" id="user_cd"/>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">真实姓名</div>
+                <div id="dd2" class="pull-left div-dd">
+                    <input class="form-control" name="user_name" id="user_name"/>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别</div>
+                <div id="dd4" class="pull-left div-dd">
+                    <select id="sexsel" name="sex" class="form-control select select-default" data-toggle="select">
+                        <option value="01">男</option>
+                        <option value="02">女</option>
+                    </select>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;话</div>
+                <div id="dd5" class="pull-left div-dd">
+                    <input class="form-control" name="phone" id="phone"/>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">工&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作</div>
+                <div id="dd6" class="pull-left div-dd">
+                    <input class="form-control" name="job" id="job"/>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">学&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;历</div>
+                <div id="dd7" class="pull-left div-dd">
+                    <select id="educationsel" name="education" class="form-control select select-default" data-toggle="select">
+                        <option value="01">初中</option>
+                        <option value="02">高中</option>
+                        <option value="03">大专</option>
+                        <option value="04">本科</option>
+                        <option value="05">硕士</option>
+                        <option value="06">博士</option>
+                        <option value="07">博士后</option>
+                    </select>    
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">入职日期</div>
+                <div id="dd8" class="pull-left div-dd">
+                    <div class="controls input-append date form_date" data-date="" data-date-format="dd MM yyyy" data-link-field="dtp_input2" data-link-format="yyyy-mm-dd">
+                        <span class="add-on"><i class="icon-remove"></i></span>
+                        <span class="add-on"><i class="icon-th"></i></span>
+                        <div class="form-group has-feedback">
+                          <input name="entry_date" id="entry_date" size="10" type="text" readonly class="form-control" style="cursor: pointer;">
+                          <span class="form-control-feedback fui-calendar"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">生&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日</div>
+                <div id="dd9" class="pull-left div-dd">
+                    <div class="controls input-append date form_date" data-date="" data-date-format="dd MM yyyy" data-link-field="dtp_input2" data-link-format="yyyy-mm-dd">
+                        <span class="add-on"><i class="icon-remove"></i></span>
+                        <span class="add-on"><i class="icon-th"></i></span>
+                        <div class="form-group has-feedback">
+                          <input name="birthday" id="birthday" size="10" type="text" readonly class="form-control" style="cursor: pointer;">
+                          <span class="form-control-feedback fui-calendar"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix line-div">
+                <div class="pull-left div-dt text-left">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址</div>
+                <div id="dd10" class="pull-left div-dd">
+                    <input class="form-control" name="address" id="address"/>
+                </div>
+            </div>
+          <div class="clearfix line-div">
+              <div class="col-xs-6 col-sm-6">
+                  <button type="button" class="btn btn-lg btn-primary btn-block" onClick="edit_info()">保存</button>
+              </div>
+              <div class="col-xs-6 col-sm-6">
+                  <button type="button" class="btn btn-lg btn-primary btn-block" onClick="edit_cancel()">取消</button>
+              </div>
+          </div>
+    
+      </form>
+    </div>
+    <script> 
+        function get_info(){
+            $.post(ctx()+'user/queryList',
+                {
+                    'rows':1,
+                    'page':1,
+                    'user_id':sessionStorage.getItem('user_id')
+                },
+                function(data) {
+                    checklogin(data);
+                    $('#dd2').html("&nbsp;"+data.rows[0].user_name);
+                    $('#dd3').html("&nbsp;"+data.rows[0].user_type_name);
+                    $('#dd4').html("&nbsp;"+data.rows[0].sex_name); 
+                    $('#dd5').html("&nbsp;"+data.rows[0].phone==null?"":data.rows[0].phone); 
+                    $('#dd6').html("&nbsp;"+data.rows[0].job==null?"":data.rows[0].job);
+                    $('#dd7').html("&nbsp;"+data.rows[0].education_name==null?"":data.rows[0].education_name);
+                    $('#dd8').html("&nbsp;"+dateformat(data.rows[0].entry_date));
+                    $('#dd9').html("&nbsp;"+dateformat(data.rows[0].birthday));
+                    $('#dd10').html("&nbsp;"+data.rows[0].address==null?"":data.rows[0].address);
+                    $('#user_id').val(sessionStorage.getItem("user_id"));
+                    $('#user_cd').val(sessionStorage.getItem('user_cd'));
+                    $('#user_name').val(data.rows[0].user_name);
+                    $('#dd3').val(data.rows[0].user_type_name);
+                    $('#sexsel').val(data.rows[0].sex);
+                    $('#phone').val(data.rows[0].phone);
+                    $('#job').val(data.rows[0].job);
+                    $('#educationsel').val(data.rows[0].education);
+                    $('#entry_date').val(dateformat(data.rows[0].entry_date));
+                    $('#birthday').val(dateformat(data.rows[0].birthday));
+                    $('#address').val(data.rows[0].address);
+                    $('[data-toggle="select"]').select2();
+            }); 
+        }
+        $(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            $('#dd1').html(sessionStorage.getItem('user_cd'));
+            get_info();
+        });
+        function edit_info(){
+            $.post(ctx()+'user/update',
+                $("#editinfoform").serializeArray(), 
+                function(data) {
+                    checklogin(data);
+                    if(data.mes!=undefined){
+                        my_alert(data.mes);
+                    }
+                    if (data.code=='true'){
+                        get_info();
+                        $('#infodiv').removeClass('hidden');
+                        $('#editdiv').addClass('hidden');
+                    }
+            });   
+        }
+	$('.form_date').datetimepicker({
+        language:  'zh-CN',
+        weekStart: 1,
+        todayBtn:  1,
+		autoclose: 1,
+		todayHighlight: 1,
+		startView: 2,
+		minView: 2,
+		forceParse: 0,
+        format: 'yyyy-mm-dd'
+    });
+        function updatepwdbtnonclick(){
+            $('#infodiv').addClass('hidden');
+            $('#editdiv').removeClass('hidden');
+        }
+        function edit_cancel(){
+            $('#infodiv').removeClass('hidden');
+            $('#editdiv').addClass('hidden');
+        }
+        $(document).ready(function(){
+	    	$("input").click(function(){
+	    		$(this).select();
+	    	});
+   		});
+    </script>
+  </body>
+</html>

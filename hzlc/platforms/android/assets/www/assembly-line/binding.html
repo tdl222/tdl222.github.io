@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <title>订单绑定</title>
+
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../js/app.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+</head>
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>订单绑定</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="content">
+        <form id="orderAndBoxBindForm" method="post">
+            <!--
+            <input type="hidden" name="page" id="page" value="1"/>
+            <input type="hidden" name="rows" id="rows" value="10"/>-->
+        <div class="clearfix">
+            <label class="pull-left" style="margin-top:10px;">物&nbsp;流&nbsp;单&nbsp;&nbsp;号：</label><input id="sel_logistics_no" name="logistics_no" type="text"
+				class="pull-left form-control" placeholder="请输入物流单号" onKeyDown="keynext()"/>
+        </div>
+        <div class="clearfix">
+            <label class="pull-left" style="margin-top:10px;">周转箱编号：</label><input id="sel_turnoverbox_no" name="turnoverbox_no" type="text"
+				class="pull-left form-control" placeholder="请输入周转箱编号" onKeyDown="keyback()" />
+        </div>
+        </form>
+    </div>
+
+     <div id="query3" style="display:none;">
+        <div class="table-div clear" id="tablediv">
+        	<!--动态显示部分-->
+        </div>
+        
+    </div><!-- /#query3 -->
+ 
+<script type="text/javascript">
+
+    function query3(){
+        $("#query3").css('display','block');
+        $.post(ctx()+'sortorder/orderAndBoxBindUp', 
+        $("#orderAndBoxBindForm").serializeArray(), 
+        function(data) {
+            checklogin(data);
+            $('#tablediv').html('');
+                            var str='<table class="table table-striped table-condensed" id="orderAndBoxBindTable">';
+                        $.each( data.rows, function(i, row)
+                        {
+                        str += '<tr>';
+                        str += '<td>物流单号</td>';
+                        str += '<td style="color:red;">'+(row['logistics_no']!=undefined?row['logistics_no']:'-')+'</td>';
+                        str += '</tr>';
+                        str += '<tr>';
+                        str += '<td>周转箱编号</td>';
+                        str += '<td style="color:red;">'+(row['turnoverbox_no']!=undefined?row['turnoverbox_no']:'-')+'</td>';
+                        str += '</tr>';
+                        str += '<tr>';
+                        str += '<td>绑定状态</td>';
+                        if(row['bind_status']=='1'){
+                            str += '<td id="zhuangtai" style="color:red;">异常</td>';
+                        }else{
+                            str += '<td id="zhuangtai" style="color:red;">正常</td>';
+                        }
+                        str += '</tr>';
+                        str += '<tr>';
+                        str += '<td>错误信息</td>';
+                        str += '<td style="color:red;">'+(row['err_msg']!=undefined?row['err_msg']:'-')+'</td>';
+                        str += '</tr>';
+                        }); 
+                        str += '</table>';
+                    $('#tablediv').html(str);
+                    $('#sel_logistics_no').val("");
+                    $('#sel_turnoverbox_no').val("");
+                    $('#sel_logistics_no').focus();
+                    if($('#zhuangtai').html()=='异常'){
+                    	playErrorAudio();
+                    }else if($('#zhuangtai').html()=='正常'){
+                    	playSuccessAudio();
+                    }
+        });
+    }
+
+
+    function keynext(){
+        if(event.keyCode=='13'&& $('#sel_logistics_no').val()!='')
+            logisticsNoKeydown();
+    }
+    function logisticsNoKeydown(){
+			$('#sel_turnoverbox_no').val("");
+			$('#sel_turnoverbox_no').focus();
+		}
+    function keyback(){
+        if(event.keyCode=='13'&& $('#sel_turnoverbox_no').val()!=''){
+            if($('#sel_logistics_no').val()=='')
+            {
+                return $('#sel_logistics_no').focus();
+            }
+            else{
+                query3();
+            }
+        }
+    }
+    $(function($) {
+        $('#sel_logistics_no').focus();
+        $("#menuul").html(sessionStorage.getItem('menuul'));
+    });
+</script>
+
+</body>
+</html>			

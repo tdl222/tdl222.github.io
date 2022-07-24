@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script type="text/javascript" src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+<title>设置</title>
+    <style>
+        body{padding-top: 50px;}
+        .pwdLever{
+            font-size:12px;
+            text-align:center;
+            height:10px;
+            line-height: 10px;
+        }
+        .setting-container{
+            padding: 15px;
+        }
+        #version_div{
+        	margin-top:-20px;
+        }
+    </style>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="#" onclick="v_return()"><span class="fui-arrow-left"></span>设置</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+<div class="setting-container">
+    <blockquote>
+        <a>APP版本： <span id="version_span">1.0.5</span></a>
+    </blockquote>
+    <div id="version_div"></div>
+    <button type="button" id="download_apk_btn" class="btn btn-lg btn-primary btn-block disabled" onClick="downloadApk()">下载最新安装包</button>
+    <br>
+      <label class="checkbox" for="autoLogin">
+        <input type="checkbox" value="auto-login" id="autoLogin" data-toggle="checkbox" onClick="cbOnclick1()">
+自动登录
+      </label><br>
+    <button type="button" type="button" class="btn btn-lg btn-primary btn-block" onClick="changeuse()">切换账号</button>  
+    <br><br>
+    <input type="text" id="url" class="form-control"/>
+    <span class="help-block">PC端的登录URL，“http://”开头，“/”结尾</span>
+    <button id="changeurlbtn" type="button" class="btn btn-lg btn-primary btn-block" onClick="changeurl()">修改URL</button>
+    <button type="button" class="btn btn-primary pull-left hidden" onClick="clearutl()">删除</button>
+    <br><br>
+    <input type="text" id="localStorage_wh_id" class="form-control" placeholder="仓库代码"/>
+    <span class="help-block" id="wh_name_span"></span>
+    <button id="set_wh_code_btn" type="button" class="btn btn-lg btn-primary btn-block" onClick="set_wh_code()">设置仓库代码</button>
+    <br><br>
+    <div id="passworddiv0">
+        <input type="password" id="password0" class="form-control" placeholder="当前密码" style="margin-bottom:10px;"/>
+    </div>
+    <div id="passworddiv1">
+       <input type="password" id="password1" class="form-control" placeholder="新密码"/> 
+    </div>
+    <div class="clearfix" style="margin-bottom:10px;">
+        <span class="pwdLever col-xs-4 col-sm-4 col-md-4" id="pwdLever0" style="margin-left:0px;">弱</span>
+        <span class="pwdLever col-xs-4 col-sm-4 col-md-4" id="pwdLever1">中</span>
+        <span class="pwdLever col-xs-4 col-sm-4 col-md-4" id="pwdLever2">强</span>
+    </div>
+    <div id="passworddiv2">
+        <input type="password" id="password2" class="form-control" placeholder="新密码" style="margin-bottom:10px;"/>
+    </div>
+    <button type="button" id="updatepwdbtn" class="btn btn-lg btn-primary btn-block" onClick="updatepwd()">修改密码</button>
+    <br><br>
+</div>
+    <script>
+    	function downloadApk(){
+    	//"+localStorage.getItem('wh_code_out')+"
+    		window.open(ctx()+"download/mobile-apk/wms.apk", "_system");
+    	}
+		function getApkMsg(){
+			$.get(ctx()+"download/mobile-apk/description.txt",
+		    function(data){
+					$('#version_div').html(data); 
+					if(data){
+						if($('#version_span').html()!='' && $('#version_span').html()!=$('#version_div').html().substr(5,5)){
+							$('#download_apk_btn').removeClass('disabled');
+						}else{
+							$('#download_apk_btn').addClass('disabled');
+						}
+					}
+			});
+		}
+        $(function($) {			
+	    	getApkMsg();
+            if(localStorage.getItem("auto_login")=='true'){
+                 $("#autoLogin")[0].checked = true;
+            }
+            $('#url').val(localStorage.getItem("ctx_url"));
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            if(!sessionStorage.getItem("user_cd")){
+                $('#exitbtn').addClass('disabled');
+                $('#updatepwdbtn').addClass('disabled');
+            }
+            $('#localStorage_wh_id').val(localStorage.getItem('wh_code_out'));
+            $('#wh_name_span').html('当前仓库：'+(localStorage.getItem('wh_name')==null?'-':localStorage.getItem('wh_name')));
+            //====================密码安全开始============
+            document.getElementById("password0").onkeyup = function () {
+                if(this.value){
+                    $('#passworddiv0').removeClass('has-error');
+                }
+            }
+            document.getElementById("password2").onkeyup = function () {
+                if(this.value){
+                    $('#passworddiv2').removeClass('has-error');
+                }
+            }
+            var textInput = document.getElementById("password1");
+            //给密码输入框 注册键放开事件
+            textInput.onkeyup = function () {
+                var pwdValue = this.value;
+                if(pwdValue){
+                    $('#passworddiv1').removeClass('has-error');
+                }
+                var num = pwdChange(pwdValue);
+				var dl0= document.getElementById("pwdLever0");
+				var dl1= document.getElementById("pwdLever1");
+				var dl2= document.getElementById("pwdLever2");
+                //修改密码颜色
+                if (num == 0 || num == 1) {
+                    dl0.style.backgroundColor = "#BDC3C7";
+                    dl1.style.backgroundColor = "";
+                    dl2.style.backgroundColor = "";
+                }
+                else if (num == 2) {
+                    dl0.style.backgroundColor = "#BDC3C7";
+                    dl1.style.backgroundColor = "#95A5A6";
+                    dl2.style.backgroundColor = "";
+                }
+                else if (num == 3) {
+                    dl0.style.backgroundColor = "#BDC3C7";
+                    dl1.style.backgroundColor = "#95A5A6";
+                    dl2.style.backgroundColor = "#7F8C8D";
+                }
+                else {
+                    dl0.style.backgroundColor = "";
+                    dl1.style.backgroundColor = "";
+                    dl2.style.backgroundColor = "";
+                }
+            };
+            //====================密码安全结束============
+        });
+        function cbOnclick1(){
+            if ($("#autoLogin")[0].checked == true) {
+                localStorage.setItem("auto_login", true);
+            }else{
+                localStorage.setItem("auto_login", false);
+            }
+        }
+        function changeurl(){
+            $('#changeurlbtn').html('测试中。。。');
+            $.ajax({
+                type: "post",
+                url: $('#url').val()+'webappLogin/testUrl',
+                data: "{}",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if(data=='testUrl OK'){
+                        localStorage.setItem("ctx_url", $('#url').val());
+                        $.Zebra_Dialog('修改成功!', 
+                            {
+                                'title':'提示',
+                                'onClose':function(caption) {
+                                    if(sessionStorage.getItem("user_id")){
+                                        back_login();
+                                    }
+                                }
+                        });
+                    }else{
+                        new $.Zebra_Dialog('修改失败', {'title': '提示'});
+                    }
+                    $('#changeurlbtn').html('修改');
+                },
+                error: function (msg) {
+                    my_alert('请检查网络连接或联系系统管理员');
+                    $('#changeurlbtn').html('修改');
+                }
+            });
+        }
+        function clearutl(){
+            localStorage.removeItem('ctx_url');
+        }
+        function pwdChange(v) {
+            var num = 0;
+            var reg = /\d/; //如果有数字
+            if (reg.test(v)) {
+                num++;
+            }
+            reg = /[a-zA-Z]/; //如果有字母
+            if (reg.test(v)) {
+                num++;
+            }
+            reg = /[^0-9a-zA-Z]/; //如果有特殊字符
+            if (reg.test(v)) {
+                num++;
+            }
+            if (v.length < 6) { //如果密码小于6
+                num--;
+            }
+            return num;
+        }
+        function updatepwd(){
+            if(!$('#password0').val()){
+                $('#passworddiv0').addClass('has-error');
+                $('#password0').focus();
+                return;
+            }
+            if(!$('#password1').val()){
+                $('#passworddiv1').addClass('has-error');
+                $('#password1').focus();
+                return;
+            }
+            if(!$('#password2').val()){
+                $('#passworddiv2').addClass('has-error');
+                $('#password2').focus();
+                return;
+            }
+            if($('#password1').val()!=$('#password2').val()){
+                new $.Zebra_Dialog('两次新密码输入不一致', {'title': '提示'});
+                return;
+            }
+            if($('#password1').val().length<6){
+                new $.Zebra_Dialog('密码长度不能小于6', {'title': '提示'});
+                return;
+            }
+			$.post(ctx()+"user/updatepwd",
+                {
+                    'user_pwd_old':$('#password0').val(),
+                    'user_pwd':$('#password1').val(),
+                    'newpassword':$('#password2').val(),
+                    'user_id':sessionStorage.getItem("user_id")
+                },
+                function(data){
+                    checklogin(data);
+                    if(data.mes!=undefined){
+                        new $.Zebra_Dialog(data.mes, {'title': '提示'});
+                    }
+                    if (data.code=='true'){
+                        localStorage.setItem("user_pwd", $('#password1').val());
+                        $('#password0').val('');
+                        $('#password1').val('');
+                        $('#password2').val('');
+                        document.getElementById("pwdLever0").style.backgroundColor='';
+                        document.getElementById("pwdLever1").style.backgroundColor='';
+                        document.getElementById("pwdLever2").style.backgroundColor='';
+                    }
+			});
+        }
+        function v_return(){
+            if(sessionStorage.getItem('user_cd')){
+                location.href='main.html';
+            }else{
+                location.href='login.html';
+            }
+        }
+        function set_wh_code(){
+            if(!localStorage.getItem('ctx_url')){
+                my_alert('请先设置URL');
+                return;
+            }
+			$.post(ctx()+'webappLogin/checkWhCode',
+                {
+                    'wh_code_out':$('#localStorage_wh_id').val()
+                },
+                function(data){
+                    checklogin(data);
+                    if (data.wh_id){
+                        $('#wh_name_span').html('当前仓库：'+data.wh_name);
+                        localStorage.setItem("wh_id", data.wh_id);
+                        localStorage.setItem("wh_code", data.wh_code);
+                        localStorage.setItem("wh_name", data.wh_name);
+                        localStorage.setItem("wh_code_out", data.wh_code_out);
+                        $.Zebra_Dialog('设置成功!', 
+                            {
+                                'title':'提示',
+                                'onClose':function(caption) {
+                                    if(sessionStorage.getItem("user_id")){
+                                        back_login();
+                                    }else{
+                                    	getApkMsg();
+                                    }
+                                }
+                        });
+                    }else{
+                        my_alert('设置失败');
+                    }
+			});
+        }
+        $(document).ready(function(){
+	    	$("input").click(function(){
+	    		$(this).select();
+	    	});
+   		});
+   		function changeuse(){
+   			$.post(ctx()+'user/logout',function(data) {
+   			    sessionStorage.clear();
+                localStorage.setItem("auto_login", false);
+                location.href='login.html';
+            });
+   		}
+   		function back_login(){
+   			$.post(ctx()+'user/logout',function(data) {
+	   			if(confirm("返回登录面？")){
+				    sessionStorage.clear();
+	                localStorage.setItem("auto_login", false);
+	                location.href='login.html';
+			    }
+            });
+   		}
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <title>一次汇总分拣</title>
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            padding-bottom: 50px;
+            margin: 10px;
+        }
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body style="margin-top:20px;">
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>一次汇总分拣</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <form id="firstPickQueryForm" role="form">
+                <input type="hidden" name="page" id="page" value="1"/>
+                <input type="hidden" name="rows" id="rows" value="1000"/>
+                <input type="text" class="hidden" name="avoid_enter_submit" />
+                <input type="hidden" name="status" id="firstPickStatus" value='0'/>
+                <input type="hidden" name="indi_type" id="qty_firstpick_indi_type" value='1'/>
+                <div class="clearfix">
+                    <label class="pull-left" style="margin-top:10px;">指示号</label><input id="qty_firstpick_stock_no" name="sum_stock_no" type="text"
+				class="form-control" onKeyDown="keynext();" style="width: 230px;height:40px;"/>
+                </div>
+                <div style="margin-bottom:10px;"></div>
+                <div class="clearfix">
+                    <label class="pull-left">条形码</label><input id="qry_firstpick_item_code" name="item_code" type="text"
+                        class="form-control pull-left" onKeyDown="keyback();v_pageNo=1;" style="width: 180px;height:40px;"/> 
+                    <button type="button" class="btn btn-primary pull-left" id="firstPickConfirmBtn" onClick="confirmFirstPick();">分拣</button><br>  
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="query3" style="display:none;" style="padding:10">
+        <div class="table-div clear" id="tablediv">
+                     <!--动态显示部分-->
+        </div>
+        <div class="pager-div navbar-fixed-bottom hidden" id="page_display"> 
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>
+        </div>
+	</div>
+<script type="text/javascript">
+    
+    function query3()
+    {
+        $("#query3").css('display','block');
+        $('#page_display').css('display','block');
+        $.post(ctx()+'stockout/queryStockoutItems', $("#firstPickQueryForm").serializeArray(), 
+        function(data) 
+        {
+            checklogin(data);
+            $('#tablediv').html('');
+					if(data.rows.length==0)
+                    {
+						$('#tablediv').html('<div class="line-div clear"><div class="title-div">'+
+								'没有符合条件的信息'+
+							'</div></div><hr/>');
+                        $('#firstPickConfirmBtn').css('display','none');
+						return;
+					}
+            $('#firstPickConfirmBtn').css('display','block');
+            var str='<table class="table table-striped table-condensed" id="firstPickTable"><thead><tr><th><div style="width:100px;">商品名称</div></th><th><div style="width:80px;">拣货数量</div></th><th><div style="width:100px;">货架位</div></th></tr></thead><tbody>';
+                $.each( data.rows, function(i, row)
+                {
+                str += '<tr>';
+                str += '<td>'+(row['item_name'])+'</td>';
+                str += '<td class="hidden">'+(row['bar_code'])+'</td>';
+                str += '<td>'+(row['cur_quan'])+'</td>';
+                str += '<td>'+(row['grid_nov'])+'</td>';
+                str += '</tr>';
+                }); 
+                str += '</tbody></table>';
+                $('#tablediv').html(str);
+            
+        });
+    }
+    $(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            $('#qty_firstpick_stock_no').focus();
+        });
+    function keynext(){
+        if(event.keyCode=='13'&& $('#qty_firstpick_stock_no').val()!='')
+            logisticsNoKeydown();
+    }
+    function logisticsNoKeydown(){
+			$('#qry_firstpick_item_code').val('');
+			$('#qry_firstpick_item_code').focus();
+		}
+    function keyback(){
+        if(event.keyCode=='13'&& $('#qry_firstpick_item_code').val()!=''){
+                query3();
+        }
+    }
+    function confirmFirstPick(){
+        var v_indi_type='1';
+        $.post(ctx()+'stockout/sumConfirmFirstPick',{'sum_stock_no':$('#qty_firstpick_stock_no').val(),'item_code':$('#qry_firstpick_item_code').val(),'indi_type':v_indi_type},function(data){
+            if(data.code== 'fail'){
+            	playErrorAudio();
+                my_alert('分拣失败');
+                return false;
+            }else{
+             	playSuccessAudio();
+                $('#tablediv').html('');
+                $('#qry_firstpick_item_code').val('');
+                $('#qry_firstpick_item_code').focus();
+                $('#firstPickConfirmBtn').css('display','none');
+                $('#page_display').css('display','none');
+            }
+        });
+    }
+	$(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    });
+   
+</script>
+
+</body>
+</html>			

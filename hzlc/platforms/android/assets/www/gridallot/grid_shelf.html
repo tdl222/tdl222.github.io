@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>货位上架</title>
+<!-- Meta data -->
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script src="../js/app.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <style>
+        body{padding-top: 20px;
+        padding-bottom: 70px;}
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+        .text_flow{
+            width: 230px; overflow: hidden;white-space: nowrap;text-overflow: ellipsis;
+        }
+        #select_name{width:30px;}
+        #no_data{margin-top:100px;}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>货位上架</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <input type="hidden" id="status">
+            <input type="hidden" id="grid_allot_id">
+            <form id="gridallotQueryForm" role="form">
+	            <input type="hidden" name="page" id="page" value="1"/>
+	            <input type="hidden" name="rows" id="rows" value="1"/>
+                <!--<select name="itemsRegi.ebus_code" id="qry_gridallot_ebus_code" class="select-default" data-toggle="select" style="width:310px;" onchange="init_query()"></select>-->
+                <!--<input name="wh_id" id="qry_gridallot_wh_id" type="hidden" />-->
+            <input type="text" class="hidden">
+                <input name="grid_no" id="up_grid" class="form-control" placeholder="货架位" onkeydown="if(event.keyCode=='13'&& $(this).val()!='') query3()">
+            </form>
+        </div>
+    </div>
+    <div id="query3" style="display:none;" style="padding:10">
+        <div class="table-div clear" id="tablediv">
+                     <!--动态显示部分-->
+        </div>
+		<table id="no_data" style="display:none;"><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>没有符合条件的信息</td></tr></table>
+		<button type="button" class="btn btn-primary btn-lg btn-block" id="update_num" onclick="update_num()" style="margin-bottom:50px;">上架</button>
+        <div class="pager-div navbar-fixed-bottom">
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>  
+        </div>
+	</div>
+    <script>
+      //videojs.options.flash.swf = "Flat-UI-master/dist/js/vendors/video-js.swf"
+    </script>
+<script type="text/javascript">
+    var v_pageSize=1;
+	var v_pageNo=1;
+    
+    function previous()
+    {
+        if($("#previousbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1)
+        {
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query3();
+	}
+	function next()
+    {
+        if($("#nextbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML))
+        {
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query3();
+	}
+    btnctrl();
+    function query3()
+    {
+        $('#indenum').val('');
+        $("#query3").css('display','block');
+        $('#page').val(v_pageNo);
+        $.post(ctx()+'gridallot/queryList', 
+        $("#gridallotQueryForm").serializeArray(), 
+        function(data) 
+        {
+            checklogin(data);
+            $('#tablediv').html('');
+			if(data.rows.length==0)
+            {
+				$('#tablediv').html('');
+				$('#no_data').css('display','block');
+				$('#update_num').css('display','none');
+				document.getElementById("totalpagenospan").innerHTML='0';
+				document.getElementById("pagenospan").innerHTML='0';
+				btnctrl();
+				return;
+			}
+			$('#no_data').css('display','none');
+			$('#update_num').css('display','block');
+            var vt=parseInt(data.total);
+            vt=Math.ceil(vt/v_pageSize);
+            document.getElementById("totalpagenospan").innerHTML=vt;
+            if(v_pageNo>parseInt(data.total))
+            {
+                document.getElementById("pagenospan").innerHTML=vt;
+            }
+            else
+            {
+                document.getElementById("pagenospan").innerHTML=v_pageNo;
+            }
+            var str='<table class="table table-striped table-condensed" id="gridallotTable">';
+                $.each( data.rows, function(i, row)
+                {
+                /**str += '<tr>';
+                str += '<td width="100px"><strong>序号</strong></td>';
+                str += '<td>'+(i+1+(v_pageNo-1)*v_pageSize)+'</td>';
+                str += '</tr>';**/
+                str += '<tr>';
+                str += '<td>商品名称</td>';
+                str += '<td>'+(row['itemsRegi']['item_name']!=undefined?row['itemsRegi']['item_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>货架位</td>';
+			    str += '<td>'+(row['grid_nov']!=undefined?row['grid_nov']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>条形码</td>';
+                str += '<td id="tdBarCode">'+(row['itemsRegi']['item_code']!=undefined?row['itemsRegi']['item_code']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>报检单号</td>';
+                str += '<td>'+(row['batch_no']!=undefined?row['batch_no']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>当前库存数</td>';
+                str += '<td>'+(row['cur_quan']!=undefined?row['cur_quan']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>货架数量</td>';
+                str += '<td>'+(row['shelfQty']!=undefined?row['shelfQty']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>出库指示数</td>';
+                str += '<td>'+(row['stockout_qty']!=undefined?row['stockout_qty']:'-')+'</td>';
+                str += '</tr>';
+				str += '<tr>';
+                str += '<td style="color:red;">上架数量</td>';
+                str += '<td><input class="form-control" id="indenum"></td>';
+                str += '</tr>';
+                $('#status').val(row['status']);
+                $('#grid_allot_id').val(row['grid_allot_id']);
+                });
+                str += '</table>';
+                $('#tablediv').html(str);
+                $('#indenum').focus();
+                btnctrl();
+        });
+    }
+    
+    $.ajax
+    ({ 
+				url : ctx()+'customer/allCustomer?cust_type=01&user_cd=' + sessionStorage.getItem("user_cd"),
+				dataType: 'json', 
+				success: function(jsonstr)
+                {
+                    $("#qry_gridallot_ebus_code").empty();
+                    $.each(jsonstr,function(n,value)
+                    {
+                        $("#qry_gridallot_ebus_code").append("<option value='"+value.cust_code+"' >"+value.cust_name+"</option>");
+                    });
+                    $("#ebsel").val($('#ebsel option:first').val()); 
+                    $('[data-toggle="select"]').select2();
+				}
+    });
+    function init_query()
+    
+    {
+        v_pageNo=1;
+        query3();
+    }
+    function update_num(){
+    	v_num=$('#indenum').val();
+    	if(parseInt($('#indenum').val())<=0||$('#indenum').val()==''){
+    		my_alert('请输入大于0的数字！');
+			$('#indenum').val('');
+			return;
+    	}
+    	if($('#status').val()!='01'){
+    		my_alert("不允许对此条数据进行更新!");
+    		return;
+    	}
+    	$.post(ctx()+'gridallot/updatestockbatch',{'grid_allot_id':$('#grid_allot_id').val(),'indenum':v_num},
+    		function(data){
+    			if(data.code== 'fail'){
+    				my_alert(data.mes);
+	                playErrorAudio();
+	                return false;
+	            }else{
+    			query3();
+    			playSuccessAudio();
+    			my_alert(data.mes);
+    			}
+    		});
+    }
+    
+    function clear_g(){
+    	$('#up_grid').val('');
+    	$('#up_grid').focus();
+    }
+    
+    $(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    });
+    $(function($) {
+        $("#menuul").html(sessionStorage.getItem('menuul'));
+        $('#up_grid').focus();
+    });
+
+
+</script>
+
+</body>
+</html>			

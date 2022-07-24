@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>百分比设置</title>
+<!-- Meta data -->
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{padding-top: 20px;
+        padding-bottom: 70px;}
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>百分比设置</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <form id="deliveryQueryForm" role="form">
+    			<label><div class="pull-left">批量二次：</div><input type="text" id="select_num" value="10" class="form-control pull-left" style="width:230px;margin-right:-30px;ime-mode:disabled;" onkeyup="return ValidateFloat2(this,value)" onchange="change_num()">%</label>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">	
+    	$(function($) {
+    		$("#menuul").html(sessionStorage.getItem('menuul'));
+	    	$("#select_num").focus();
+	        $("#select_num").val(localStorage.getItem('select_num1'));
+    	});
+    	function change_num(){
+	        localStorage.setItem('select_num1',$("#select_num").val());
+	        
+    	}
+    	$(document).ready(function($){
+	        $("input").click(function(){
+                $(this).select();
+        	});
+	    });
+	    function ValidateFloat2(e,pnumber)
+		 {
+		     if (!/^\d+[.]?[1-9]?$/.test(pnumber))
+		     {
+		         e.value= /\d+[.]?[1-9]?/.exec(e.value);
+		     }
+		     return false;
+		 }
+	 </script>
+</body>
+</html>			

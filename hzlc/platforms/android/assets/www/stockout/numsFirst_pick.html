@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>多面单分拣</title>
+<!-- Meta data -->
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{padding-top: 20px;
+        padding-bottom: 70px;}
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>多面单分拣</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <form id="deliveryQueryForm" role="form">
+                <input type="text" class="hidden" name="aa" id="aa">
+                <input type="hidden" name="order_id" id="or_order_id"/>
+                <input type="hidden" id="nums_order_id"/>
+                <input name="logistics_no" id="nums_logistics_no" class="form-control pull-left" style="width:250px;margin-right:5px;" onKeyDown="searchent()"/>
+                <botton type="button" class="btn btn-primary pull-left" onclick="confirmfirsts()">分拣</button>
+            </form>
+        </div>
+    </div>
+    <div id="query3">
+    	<table style="display:none;">
+    		<tbody id="trs"></tbody>
+    	</table>
+    	<div id="no_data" class="pull-left" style="display:none;font-size:16px;font-weight:bold;"></div>
+    	<table class="table table-striped table-condensed" id="gridallotTable">
+	    	<thead>
+	    	<tr>
+		    	<th><div style="width:100px;">库位号</div></th>
+		    	<th><div style="width:100px;">商品名称</div></th>
+		    	<th>批次号</th>
+		    	<th>数量</th>
+		    </tr>
+	    	</thead>
+	    	<tbody id="tbodys">
+	    	</tbody>
+    	</table>
+	</div>
+<script type="text/javascript">
+    var v_order_id='?';
+    var v_tr='';
+    function searchent(){
+    	if(event.keyCode=='13'&& $('#nums_logistics_no').val()!=''){
+    		orqu();
+        }
+    }
+    function orqu(){
+        $('#no_data').css('display','block');
+    	$.post(ctx()+'order/queryOrderList', 
+        {'page':1,'rows':1,'logistics_no':$('#nums_logistics_no').val()},
+        function(data){
+        	checklogin(data);
+					if(data.rows.length==0)
+                    {
+                    	$('#no_data').html($('#nums_logistics_no').val()+'：无相关信息');
+                    	$('#nums_logistics_no').val('');
+						$('#nums_logistics_no').focus();
+						return;
+					}
+					if(data.rows[0]['status_txt']=="已发货"){
+						$('#no_data').html($('#nums_logistics_no').val()+data.rows[0]['status_txt']);
+						$('#nums_logistics_no').val('');
+						$('#nums_logistics_no').focus();
+						return;
+					}
+					if(data.rows[0]['stockout_status_txt']!="已指示"){
+						$('#no_data').html($('#nums_logistics_no').val()+data.rows[0]['stockout_status_txt']);
+						$('#nums_logistics_no').val('');
+						$('#nums_logistics_no').focus();
+						return;
+					}
+				$('#or_order_id').val(data.rows[0]['order_id']);
+				query3();
+        });
+    }
+    function query3()
+    {
+        $.post(ctx()+'orderdetail/queryAllByOrderId', 
+        {'order_id':$('#or_order_id').val()},
+        function(data) 
+        {
+        	if(!data){
+				$('#no_data').html($('#nums_logistics_no').val()+"下没有商品信息");
+				$('#nums_logistics_no').val('');
+				$('#nums_logistics_no').focus();
+				return;
+        	}
+			$('#no_data').html("当前面单号："+$('#nums_logistics_no').val());
+            var str='';
+                $.each( data, function(i,data)
+                {
+                str += '<tr>';
+			    str += '<td>'+(data['grid_nov'])+'</td>';
+                str += '<td>'+(data['item_name'])+'</td>';
+                str += '<td>'+data['batchno']+'</td>';
+                str += '<td>'+data['num']+'</td>';
+                str += '</tr>';
+				v_order_id += "&order_id="+data['order_id']+"&bar_code="+data['bar_code'];
+                });	
+            $('#trs').html(str);
+	    	$('#nums_logistics_no').val('');
+			$('#nums_order_id').val(v_order_id);
+	    	nums();
+        });
+    }
+    
+    function nums(){
+    	var tbs=document.getElementById("tbodys").rows;
+    	var trs=document.getElementById("trs").rows;
+    	
+    	for(var i=0;i<tbs.length;i++){
+    		for(var j=0;j<trs.length;j++){
+    			if(trs[j].cells[0].innerHTML==tbs[i].cells[0].innerHTML&&trs[j].cells[2].innerHTML==tbs[i].cells[2].innerHTML){
+    				tbs[i].cells[3].innerHTML=parseInt(tbs[i].cells[3].innerHTML)+parseInt(trs[j].cells[3].innerHTML);
+    				document.getElementById('trs').deleteRow(j);
+    			}
+    		}
+    	}
+    	v_tr =$('#tbodys').html();
+    	v_tr += $('#trs').html();
+    	$('#tbodys').html(v_tr);
+    }
+    
+    function confirmfirsts(){
+    	$.post(ctx() + 'stockoutorder/confirmFirsts'+v_order_id,
+    	function(data){
+    		checklogin(data);
+    		if(data.code== 'fail'){
+            	playErrorAudio();
+                my_alert(data.mes);
+                return false;
+            }else{
+                $('#tbodys').html('');
+                $('#nums_logistics_no').focus();
+                v_order_id='?';
+    			v_tr='';
+             	playSuccessAudio();
+            }
+    	});
+    }
+    $(document).ready(function($){
+        $("input").click(function(){
+                $(this).select();
+        });
+    });
+    $(function($) {
+        $("#menuul").html(sessionStorage.getItem('menuul'));
+        $("#nums_logistics_no").focus();
+    });
+
+
+</script>
+
+</body>
+</html>			

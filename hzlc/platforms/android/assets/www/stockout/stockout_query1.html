@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            padding:15px;
+        }
+    </style>
+<title>分拣查询</title>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>分拣查询</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+<br><br>
+    <form role="form">
+        <input id="query_batch_no" class="form-control" onKeyDown="down_btn()" placeholder="打印批次号" style="margin-bottom:10px;"/>
+        <input id="query_bar_code" class="form-control" onKeyDown="seach_btn()" placeholder="条形码"/>
+    </form>
+    <br>
+    <div id="display-div" style="display:none;" style="padding:10">
+        <div class="table-div clear" id="tablediv2">
+            <table class="table table-striped">
+                <tr>
+                    <td>商品名称</td>
+                    <td><div id="num1"></div></td>
+                </tr>
+                <tr>
+                    <td>条形码</td>
+                    <td><div id="num2"></div></td>
+                </tr>
+                <tr>
+                    <td>货号</td>
+                    <td><div id="num3"></div></td>
+                </tr>
+                <tr>
+                    <td>规格型号</td>
+                    <td><div id="num4"></div></td>
+                </tr>
+            </table>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <td>批次号</td>
+                        <td>分拣数</td>
+                    </tr>
+                </thead>
+                <tbody id="tablediv0"></tbody>
+            </table>
+            <div id="sum-div"></div>
+        </div>
+    </div>
+    <script>
+        $(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            $('#query_batch_no').focus();
+        });
+        function query(){
+            if(!$('#query_batch_no').val()){
+                $('#query_batch_no').focus();
+            }
+            if(!$('#query_bar_code').val()){
+                $('#query_bar_code').focus();
+            }
+            $.post(ctx()+'dynamicquery/queryList', 
+                {
+                    'batch_no':"%"+$('#query_batch_no').val().substr(0,6)+"%",
+                    'bar_code':$('#query_bar_code').val(),
+                    'module_id':118,
+                    'sql_where':'',
+                    'rows':100,
+                    'page':1
+                }, 
+                function(data) {
+                    checklogin(data);
+                    if(data.rows.length==0)
+                    {
+                        $('#display-div').css('display','none');
+                        my_alert('无数据');
+						return;
+					}
+                    $("#display-div").css('display','block');
+                    $('#num1').html(data.rows[0]['ITEM_NAME']);
+                    $('#num2').html(data.rows[0]['ITEM_CODE']);
+                    $('#num3').html(data.rows[0]['BAR_CODE']);
+                    $('#num4').html(data.rows[0]['T_MODEL']);
+                    var str="";
+                    var sum=0;
+                    $.each( data.rows, function(i, row){
+                        str += '<tr>';
+                        str += '<td>'+row['BATCHNO']+'</td>';
+                        str += '<td>'+row['NUM']+'</td>';
+                        str += '</tr>';
+                        sum += parseInt(row['NUM']);
+                    }); 
+                    $('#tablediv0').html(str);
+                    $('#sum-div').html('合计：'+sum);
+              });
+        }
+        function down_btn(){
+        	if(event.keyCode=='13'&& $('#query_batch_no').val()!='')
+        		$('#query_bar_code').focus();
+        }
+        function seach_btn(){
+        	if(event.keyCode=='13'&& $('#query_bar_code').val()!='')
+        		query();
+        }
+	$(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    });
+    </script>
+</body>
+</html>

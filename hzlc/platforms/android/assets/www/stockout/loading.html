@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script src="../js/app.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <style>
+        body{
+            padding-top: 70px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    </style>
+<title>装载作业</title>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>装载作业</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+<div id="content">
+    <form role="form">
+        <input class="hidden" id="cust_code_out"/>
+        <input class="hidden" id="load_id"/>
+        <input id="tray_number" class="form-control" placeholder="托盘号" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='') get_loading()" style="margin-bottom:10px;"/>
+        <select id="logistics_company" class="form-control select select-default" data-toggle="select"></select>&nbsp;&nbsp;
+    <button type="button" class="btn btn-primary easyui-linkbutton disabled" onClick="create()" id="create-btn"><i class="fui-check"></i>生成</button>&nbsp;&nbsp;
+    
+        <h5 id="binding_number">&nbsp;</h5>
+        <h5 id="status">&nbsp;</h5>
+            <input id="logistics_no" class="form-control" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='') check_logistics_company()" placeholder="快递单号" readonly/>
+        <h6 id="result-h">&nbsp;</h6>
+        <button type="button" class="btn btn-primary btn-lg btn-block disabled" onClick="over()" id="over-btn"><i class="fui-power"></i>结束</button>
+    </form>
+</div>
+
+    <script>
+        $(function($) {
+            $('#tray_number').focus();
+            $.post(ctx()+'customer/allCustomer?cust_type=02',
+                function(data) {
+                    $("#logistics_company").empty();
+                    $.each(data,function(n,value)
+                    {
+                        $("#logistics_company").append("<option value='"+value.cust_id+"' >"+value.cust_name+"</option>");
+                    });
+                    $("#logistics_company").val($('#logistics_company option:first').val()); 
+                    $('[data-toggle="select"]').select2();
+            });
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+        });
+        function create(){
+            $('#create-btn').addClass('disabled');
+            $.post(ctx()+'loading/add?tray_number='+$('#tray_number').val()+'&cust_id='+$('#logistics_company').val(),
+                function(data) {
+                    checklogin(data);
+                    if(data.code=="true"){
+                        get_loading();
+                    }else{
+                        my_alert('生成失败');
+                        $('#create-btn').removeClass('disabled');
+                    }
+            });
+        }
+        function get_loading(){
+            $.post(ctx()+'loading/queryList?rows=1&status=01&tray_number='+$('#tray_number').val(),
+                function(data) {
+                    checklogin(data);
+                    if(data.rows[0]){
+                        $('#binding_number').html("绑定号："+data.rows[0].binding_number);
+                        $('#load_id').val(data.rows[0].load_id);
+                        $('#status').html("状&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;态："+(data.rows[0].status=='01'?'已绑定':'已结束'));
+                        $("#logistics_company").val(data.rows[0].cust_id);
+                        $('[data-toggle="select"]').select2();
+                        $('#create-btn').addClass('disabled');
+                        $('#logistics_no').focus();
+                        $('#cust_code_out').val(data.rows[0].cust_code_out);
+                        if(data.rows[0].status=='01'){
+                            $('#over-btn').removeClass('disabled');
+                            $('#logistics_no').removeAttr("readonly");
+                        }
+                    }else{
+                        $('#binding_number').html('&nbsp;');
+                        $('#status').html("&nbsp;");
+                        $('#create-btn').removeClass('disabled');
+                    }
+            });
+        }
+        function check_logistics_company(){
+            $.post(ctx()+'order/queryList?rows=1&logistics_no='+$('#logistics_no').val(),
+                function(data) {
+                    checklogin(data);
+                    if(data.rows[0]){
+                        if(data.rows[0].logistics_company==$('#cust_code_out').val()){
+                            $('#result-h').html($('#logistics_no').val()+'：装载成功');
+                            playSuccessAudio();
+                        }else{
+                            $('#result-h').html($('#logistics_no').val()+'：装载失败');
+                            playErrorAudio();
+                        }
+                    }else{
+                        my_alert('快递单号：'+$('#logistics_no').val()+'不存在');
+                    }
+                    $('#logistics_no').val('');
+            });
+        }
+        function over(){
+            $.post(ctx()+'loading/update?status=02&load_id='+$('#load_id').val(),
+                function(data) {
+                    checklogin(data);
+                    if(data.code=='fail'){
+                        my_alert('操作失败');
+                    }else{
+                        $('#tray_number').val('');
+                        $('#logistics_no').val('');
+                        $('#binding_number').html('&nbsp;');
+                        $('#status').html('&nbsp;');
+                        $('#tray_number').focus();
+                        $('#over-btn').addClass('disabled');
+                        $('#result-h').html('&nbsp;');
+                        $('#logistics_no').attr("readonly","readonly")
+                    }
+            });
+        }
+        $(document).ready(function(){
+	    	$("input").click(function(){
+	    		$(this).select();
+	    	});
+   		});
+    </script>
+</body>
+</html>

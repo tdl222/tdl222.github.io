@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <title>订单查询</title>
+
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{padding-bottom: 70px;}
+        .pager-div{
+            width: 370px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>订单查询</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <form id="orderListQueryForm" role="form">
+                 <input type="hidden" name="page" id="page" value="1"/>
+                <input type="hidden" name="rows" id="rows" value="1"/>
+                      
+                <label class="pull-left">联&nbsp;&nbsp;系&nbsp;&nbsp;人：</label><input name="receiver_name" id="dy_qry_order_receiver_name" style="width: 230px;height:40px;" class="form-control pull-left" onchange="v_pageNo=1"/><br><br>
+                       
+                <label class="pull-left">订&nbsp;&nbsp;单&nbsp;&nbsp;号：</label><input name="tid" id="dy_qry_order_tid" style="width:230px;height:40px;" class="form-control pull-left" onchange="v_pageNo=1"/>
+                <br><br>      
+                <label class="pull-left">快递单号：</label><input name="logistics_no" id="dy_qry_order_logistics_no" style="width: 155px;height:40px;" class="form-control pull-left"  onchange="v_pageNo=1"/> 
+                
+                <button type="button" class="btn btn-primary easyui-linkbutton pull-left" onClick="order_search()"><i class="fui-search"></i>查询</button>
+                       
+            </form>
+        </div>
+    </div>
+    <div id="query3" style="display:none;" style="padding:10">
+        <div class="table-div clear" id="tablediv">
+                     <!--动态显示部分-->
+        </div>
+        <div class="pager-div navbar-fixed-bottom" id="page_hide">
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>  
+        </div>
+	</div>
+
+
+<script type="text/javascript">
+    
+    var v_pageSize=1;
+	var v_pageNo=1;
+    
+    function previous()
+    {
+        if($("#previousbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1)
+        {
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query();
+	}
+	function next()
+    {
+        if($("#nextbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML))
+        {
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query();
+	}
+    btnctrl();
+    function order_search(){
+    	if($('#dy_qry_order_receiver_name').val()!=''||$('#dy_qry_order_tid').val()!=''||$('#dy_qry_order_logistics_no').val()!=''){
+    		v_pageNo=1;
+    		query();
+    	}else{
+    		my_alert("必须有一个查询条件！");
+    	}
+    }
+    function query()
+    {
+        $("#query3").css('display','block');
+        $('#page').val(v_pageNo);
+        $(this).focus();
+        $.post(ctx()+'order/queryOrderList', 
+        $("#orderListQueryForm").serializeArray(), 
+        function(data) 
+        {
+            checklogin(data);
+            $('#tablediv').html('');
+					if(data.rows.length==0)
+                    {
+                    	$('#page_hide').css('display','none');
+						var t_str='<table class="table table-striped table-condensed" id="errorTable">';
+                            var row=data.rows[0];
+                            t_str += '<tr>';
+			                t_str += '<td>联系人:</td>';
+			                t_str += '<td>'+$('#dy_qry_order_receiver_name').val()+'</td>';
+			                t_str += '</tr>';
+			                t_str += '<tr>';
+			                t_str += '<td>订单号:</td>';
+			                t_str += '<td>'+$('#dy_qry_order_tid').val()+'</td>';
+			                t_str += '</tr>';
+							t_str += '<tr>';
+			                t_str += '<td>快递单号:</td>';
+			                t_str += '<td>'+$('#dy_qry_order_logistics_no').val()+'</td>';
+			                t_str += '</tr>';
+			                t_str += '<tr>';
+                            t_str += '<td>&nbsp;</td>';
+			                t_str += '<td>没有符合条件的信息</td>';
+			                t_str += '</tr>';
+			                t_str += '</table>';
+                		$('#tablediv').html(t_str);
+						return clear_order();
+					}
+			$('#page_hide').css('display','block');
+            var vt=parseInt(data.total);
+            vt=Math.ceil(vt/v_pageSize);
+            document.getElementById("totalpagenospan").innerHTML=vt;
+            if(v_pageNo>parseInt(data.total))
+            {
+                document.getElementById("pagenospan").innerHTML=vt;
+            }
+            else
+            {
+                document.getElementById("pagenospan").innerHTML=v_pageNo;
+            }
+            var str='<table class="table table-striped table-condensed" id="gridallotTable">';
+                $.each( data.rows, function(i, row)
+                {
+                str += '<tr>';
+                str += '<td width="85px;">订单号</td>';
+			    str += '<td>'+(row['tid']!=undefined?row['tid']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>交货人姓名</td>';
+                str += '<td>'+(row['receiver_name']!=undefined?row['receiver_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>交货人电话</td>';
+                str += '<td>'+(row['receiver_phone']!=undefined?row['receiver_phone']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>买家用户名</td>';
+                str += '<td>'+(row['buyer_nick']!=undefined?row['buyer_nick']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>付款时间</td>';
+                str += '<td>'+(row['paymentdate']!=undefined?timestampformat(row['paymentdate']):'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>详细地址</td>';
+                str += '<td>'+(row['receiver_address']!=undefined?row['receiver_address']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>快递单号</td>';
+                str += '<td>'+(row['logistics_no']!=undefined?row['logistics_no']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>下单时间</td>';
+                str += '<td>'+(row['billdate']!=undefined?dateformat(row['billdate']):'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>订单状态</td>';
+                str += '<td>'+(row['status_txt']!=undefined?row['status_txt']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>出库状态</td>';
+                str += '<td>'+(row['stockout_status_txt']!=undefined?row['stockout_status_txt']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>国检状态</td>';
+                str += '<td>'+(row['country_check_status_name']!=undefined?row['country_check_status_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<td>国检状态时间</td>';
+                str += '<td>'+(row['country_check_update']!=undefined?timestampformat(row['country_check_update']):'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>海关状态</td>';
+                str += '<td>'+(row['custom_status_name']!=undefined?row['custom_status_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>海关状态时间</td>';
+                str += '<td>'+(row['custom_status_update']!=undefined?timestampformat(row['custom_status_update']):'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>重量</td>';
+                str += '<td>'+(row['packag_weight']!=undefined?row['packag_weight']:'-')+'</td>'; 
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>实付金额</td>';
+                str += '<td>'+(row['payment']!=undefined?row['payment']:'-')+'</td>'; 
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>是否打印</td>';
+                str += '<td>'+(row['delivery_print_times_txt']!=undefined?row['delivery_print_times_txt']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>承运商</td>';
+                str += '<td>'+(row['logistics_name']!=undefined?row['logistics_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>货主编码</td>';
+                str += '<td>'+(row['cust_code_out']!=undefined?row['cust_code_out']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>仓库代码</td>';
+                str += '<td>'+(row['wh_code_out']!=undefined?row['wh_code_out']:'-')+'</td>';
+                str += '<tr>';
+                str += '<td>指示号</td>';
+                str += '<td>'+(row['stock_no']!=undefined?row['stock_no']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>货主名称</td>';
+                str += '<td>'+(row['cust_name']!=undefined?row['cust_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>跨境平台订单号</td>';
+                str += '<td>'+(row['kj_tid']!=undefined?row['kj_tid']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>邮政编码</td>';
+                str += '<td>'+(row['post_code']!=undefined?row['post_code']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>订单类型</td>';
+                str += '<td>'+(row['order_type_name']!=undefined?row['order_type_name']:'-')+'</td>';
+                str += '</tr>';
+                }); 
+                str += '</table>';
+                $('#tablediv').html(str);
+                btnctrl();
+                //clear_order();
+        });
+    }
+ 	$(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    	$("input").change(function(){
+    		v_pageNo=1;
+    		order_search();
+    	});
+    });
+    function clear_order(){
+        $('#dy_qry_order_receiver_name').val('');
+        $('#dy_qry_order_tid').val('');
+        $('#dy_qry_order_logistics_no').val('');
+    }
+    $(function($) {
+        $("#menuul").html(sessionStorage.getItem('menuul'));
+        $('#dy_qry_order_logistics_no').focus();
+    });
+</script>
+
+</body>
+</html>			

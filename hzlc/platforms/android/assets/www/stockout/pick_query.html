@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>货架位查询</title>
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            min-width:350px;
+            padding-top: 60px;
+            padding-bottom: 150px;
+        }
+        .table_margin_top{margin-top: -18px;}
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+        .tb{width:60px;}
+    </style>
+</head>
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>货架位查询</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+    <div id="content">
+        <form role="form">
+            <input type="hidden" name="page" id="page" value="1"/>
+            <input type="hidden" name="rows" id="rows" value="10"/>
+        <div class="clearfix">
+        	<input name="wh_code" id="wh_code">
+            <input name="grid_nov" id="qu_nov" class="form-control"> 
+        </div>
+        <div class="clearfix" style="padding-top:10px;height:60px;overflow:hidden;">
+            <div class="pull-left clearfix">
+                <div class="controls input-append date form_date" data-date="" data-date-format="dd MM yyyy" data-link-field="dtp_input2" data-link-format="yyyy-mm-dd">
+                    <span class="add-on"><i class="icon-remove"></i></span>
+				    <span class="add-on"><i class="icon-th"></i></span>
+                    <div class="form-group has-feedback">
+                      <input name="from_time" id="busidate1" size="10" type="text" value="" readonly class="form-control" style="cursor: pointer;" onclick="movedatediv(this.id)" onchange="query()">
+                      <span class="form-control-feedback fui-calendar"></span>
+                    </div>
+                </div>
+				<input type="hidden" id="dtp_input2" value="" /><br/>
+            </div>
+            <div class="pull-left" style="width:20px;padding-top:10px;padding-left:3px;">至</div>
+            <div class="pull-left clearfix">
+                <div class="controls input-append date form_date" data-date="" data-date-format="dd MM yyyy" data-link-field="dtp_input2" data-link-format="yyyy-mm-dd">
+                    <span class="add-on"><i class="icon-remove"></i></span>
+				    <span class="add-on"><i class="icon-th"></i></span>
+                    <div class="form-group has-feedback">
+                      <input name="to_time" id="busidate2" size="10" type="text" value="" readonly class="form-control" style="cursor: pointer;" onclick="movedatediv(this.id)" onchange="query()">
+                      <span class="form-control-feedback fui-calendar"></span>
+                    </div>
+                </div>
+				<input type="hidden" id="dtp_input2" value="" />
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1">
+                <button type="button" class="btn btn-primary pull-left" onclick="query()"><span class="fui-search"></span>查询
+                </button>
+            </div>
+        </div>
+            <br>
+        </form>
+    </div>
+    <div id="query2" style="display:none;" class="table_margin_top">
+        <table class="table table-striped">
+        	<thead>
+            <tr>
+               <td>商品名称</td>
+                <td>报检单号</td>
+                <td>货号</td>
+                <td>已拣数量</td>
+            </tr>
+        	</thead>
+        	<tbody id="tbody0"></tbody>
+        </table>
+        <div class="pager-div navbar-fixed-bottom">
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>
+        </div>
+     </div>
+<script type="text/javascript">
+	 $(function($) {
+            $('#grid_nov').focus();
+            $.post(ctx() + 'warehouse/allWH',
+    			function(data){
+                $.each(data,function(n,value)
+                {
+                    $("#wh_code").append("<option value='"+value.wh_code+"' >"+value.wh_name+"</option>");
+                });
+                $("#wh_code").val($('#wh_code option:first').val()); 
+                $('[data-toggle="select"]').select2();
+    		});
+        });
+    var v_pageSize=10;
+	var v_pageNo=1;
+    
+	function previous(){
+        if($("#previousbtn").hasClass("disabled")){
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1){
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query3();
+	}
+	function next(){
+        if($("#nextbtn").hasClass("disabled")){
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML)){
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query3();
+	}
+    btnctrl();
+	 function query3(){
+	 	var v_grid=$('#wh_code').val()+$('#qu_nov').val().replace('-','').replace('-','').replace('-','').replace('-','');
+	 	$.post(ctx() + 'stockoutorder/queryListByGridNo',{'page':v_pageNo,'rows':10,'shelf_location':v_grid,'from_time':$('#busidate1').val(),'to_time':$('#busidate2').val(),'status':1},
+	 	function(data){
+	 		checklogin(data);
+            $('#tbody0').html('');
+					if(data.rows.length==0){
+						$('#tbody0').html('<div class="line-div clear"><div class="title-div">'+
+								'没有符合条件的信息'+
+							'</div></div><hr/>');
+						document.getElementById("totalpagenospan").innerHTML='0';
+						document.getElementById("pagenospan").innerHTML='0';
+						btnctrl();
+						return;
+					}
+            var vt=parseInt(data.total);
+            vt=Math.ceil(vt/v_pageSize);
+            document.getElementById("totalpagenospan").innerHTML=vt;
+            if(v_pageNo>parseInt(data.total)){
+                document.getElementById("pagenospan").innerHTML=vt;
+            }else{
+                document.getElementById("pagenospan").innerHTML=v_pageNo;
+            }
+            var str='';
+            $.each( data.rows, function(i, row){
+                str += '<tr>';
+                str += '<td>'+(i+1+(v_pageNo-1)*v_pageSize)+'</td>';
+			    str += '<td>'+row['item_name']+'</td>';
+                str += '<td>'+(row['batchno'])+'</td>';
+                str += '<td>'+(row['bar_code'])+'</td>';
+                str += '<td>'+(row['done_num'])+'</td>';
+                str += '</tr>';
+		  });
+            $('#tbody0').html(str);
+            btnctrl();
+	 	});
+	 
+	 }
+	function query(){
+		v_pageNo=1;
+		query3();
+	}
+    $(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    });
+	$('.form_date').datetimepicker({
+        language:  'zh-CN',
+        weekStart: 1,
+        todayBtn:  1,
+		autoclose: 1,
+		todayHighlight: 1,
+		startView: 2,
+		minView: 2,
+		forceParse: 0,
+        format: 'yyyy-mm-dd'
+    });
+	$(function($) {
+        var now = new Date();
+        var year = now.getFullYear();
+        var month =(now.getMonth() + 1).toString();
+        var day = (now.getDate()).toString();
+        if (month.length == 1) {
+            month = "0" + month;
+        }
+        if (day.length == 1) {
+            day = "0" + day;
+        }
+        var dateTime = year + '-' + month + '-' + day;
+        $('#busidate1').val(dateTime);
+        $('#busidate2').val(dateTime);
+        //query();
+        $("#menuul").html(sessionStorage.getItem('menuul'));
+        $("#wh_code").val(sessionStorage.getItem('wh_code'));
+	  });
+</script>
+
+</body>
+</html>			

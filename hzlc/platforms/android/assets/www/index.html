@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>index</title>
+    <!-- Custom styles for this template -->
+    <link href="css/signin.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="js/app.js"></script>
+    <script src="Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+      <style>
+        .img_size{width: 90%;margin-left: 5%;}
+        body{
+            background-color: #ECF0F1;
+        }
+      </style>
+  </head>
+
+  <body>
+      <div id="login_update" class="hidden"></div>
+      <br>
+        <div class="col-xs-12 col-sm-12">
+          <img class="img_size" src="images/login.png">
+        </div>
+    <br><br>
+      <div style="text-align: center;font-family: '微软雅黑', 'Microsoft YaHei', Arial, Helvetica, sans-serif;font-size: 24px;padding-top:30px;margin-top:40px;">
+          
+          <br><br>
+          <span class="fui-star"></span>
+          <i>品质服务&nbsp;<span class="fui-star"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i>
+          <br>
+          <span class="fui-star"></span>
+          <i>不断创新</i>
+          <span class="fui-star"></span>
+          <br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <span class="fui-star"></span>
+              扬帆远航
+              <span class="fui-star"></span>
+          </i>  
+          <br><br>
+              <div style="width:120px;margin:auto;padding-top:30px;">
+                  <a href="#" class="btn btn-block btn-sm btn-info" onclick="index_href()">登录</a>
+              </div>
+              <div style="width:120px;margin:auto;padding-top:30px;">
+                  <a href="base/setting.html" class="btn btn-block btn-sm btn-info">设置</a>
+              </div>
+          <br><br>
+      </div>
+      
+<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+   <div class="col-xs-12" style="text-align: center;vertical-align:middle;">
+<div
+						style="width: 100%; text-align: center; font: 12px/20px Arial, Helvetica, sans-serif">
+						<div
+							style="TEXT-ALIGN: center; LINE-HEIGHT: 24px; MARGIN: 0px; FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif;">版权所有
+							Copyright(c)2013-2018 <img src="images/wcloud.ico" width="12px">&nbsp;杭州ECM</img>&nbsp;&nbsp;浙ICP备14020092号</div>
+					</div>
+
+   </div>
+</nav>
+    <script type="text/javascript">
+        //javascript:window.history.forward(1); 
+        /*$(function($) {
+            if (navigator.onLine) {
+                //setTimeout("location.href = 'login.html'",50);
+                 //my_alert('login.html');
+            } else { 
+                my_alert('请检查网络连接');
+            } 
+            //localStorage.removeItem('ctx_url');
+        });*/
+		document.addEventListener("deviceready", onDeviceReady, false);  
+		function onDeviceReady() {  
+		  navigator.splashscreen.hide();  
+		} 
+		
+		$(function($) {
+	        $.get(ctx()+"download/mobile-apk/description.txt",
+		    function(data){
+					$('#login_update').html(data); 
+					if(data){
+						if($('#login_update').html()!='' && $('#login_update').html().substr(5,5)!='1.0.5'){
+							if(confirm("有新版本，是否更新？")){
+							    downloadApk();
+						    }
+						}
+					}
+			});
+	    });
+	    function downloadApk(){
+    		window.open(ctx()+"download/mobile-apk/wms.apk", "_system");
+    	}
+        function index_href(){
+            if(localStorage.getItem('ctx_url')){
+                location.href = 'base/login.html';
+            }else{
+                localStorage.setItem('ctx_url','http://60.191.70.138:3301/ecmhs/');
+                location.href = 'base/login.html';
+                /*$.Zebra_Dialog('请设置URL', 
+                    {
+                        'title':'提示',
+                        'onClose':function(caption) {
+                            location.href = 'base/setting.html';
+                        }
+                });*/
+            }
+        }
+    </script>
+  </body>
+</html>

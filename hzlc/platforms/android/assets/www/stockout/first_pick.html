@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <title>一次分拣</title>
+
+    <!-- Loading Flat UI -->
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script type="text/javascript" src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            padding-bottom: 50px;
+            margin: 10px;
+        }
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body style="margin-top:20px;">
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>一次分拣</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <form id="firstPickQueryForm" role="form">
+                <input type="hidden" name="page" id="page" value="1"/>
+                <input type="hidden" name="rows" id="rows" value="1"/> 
+                <input type="text" class="hidden" name="avoid_enter_submit" />
+                <input type="hidden" name="item_id" id="hidden_item_id"/>
+                <input type="hidden" name="grid_no" id="grid_no"/>
+                <input type="hidden" name="order_id" id="qry_order_id"/>
+                <input type="hidden" name="status" id="firstPickStatus"/>
+                <input type="hidden" name="indi_type" id="qty_firstpick_indi_type"/>
+                <div class="clearfix">
+                    <label class="pull-left" style="margin-top:10px;">指示号：</label><input id="qty_firstpick_stock_no" name="stock_no" type="text"
+				class="easyui-validatebox form-control" data-options="required:true" onKeyDown="keynext();" style="width: 230px;height:40px;"/>
+                </div>
+                <div style="margin-bottom:10px;"></div>
+                <div class="clearfix">
+                    <label class="pull-left" style="margin-top:10px;">条形码：</label><input id="qry_firstpick_item_code" name="item_code" type="text"
+                        class="easyui-validatebox form-control" data-options="required:true" onKeyDown="keyback();v_pageNo=1;" style="width: 230px;height:40px;"/>   
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="query3" style="display:none;" style="padding:10">
+        <div class="table-div clear" id="tablediv">
+                     <!--动态显示部分-->
+        </div>
+        <button type="button" class="btn btn-lg btn-primary btn-block" id="firstPickConfirmBtn" onClick="confirmFirstPick();">确认分拣</button><br>
+        <div class="pager-div navbar-fixed-bottom" id="page_display"> 
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>
+        </div>
+	</div>
+    <!--查询-->
+    <div id="query4" style="display:none;padding:10">
+        <div class="table-div clear" id="tablediv2">
+            <table class="table table-striped">
+                <tr>
+                    <td>商品名称</td>
+                    <td><div id="num1"></div></td>
+                </tr>
+                <tr>
+                    <td>条形码</td>
+                    <td><div id="num2"></div></td>
+                </tr>
+                <tr>
+                    <td>货号</td>
+                    <td><div id="num3"></div></td>
+                </tr>
+                <tr>
+                    <td>规格型号</td>
+                    <td><div id="num4"></div></td>
+                </tr>
+            </table>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <td>批次号</td>
+                        <td>未分拣数量</td>
+                    </tr>
+                </thead>
+                <tbody id="tablediv0"></tbody>
+            </table>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    
+    var v_pageSize=1;
+	var v_pageNo=1;
+    
+    function previous()
+    {
+        if($("#previousbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1)
+        {
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query3();
+	}
+	function next()
+    {
+        if($("#nextbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML))
+        {
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		query3();
+	}
+    btnctrl();
+    
+    function query3()
+    {
+        $("#query3").css('display','block');
+        $('#page_display').css('display','block');
+        $('#page').val(v_pageNo);
+        if($('#qty_firstpick_stock_no').val().substr(0,1)!='1'){
+            $('#qty_firstpick_indi_type').val('2');
+        }else{
+            $('#qty_firstpick_indi_type').val('1');
+        }
+        $.post(ctx()+'stockout/firstPickList', $("#firstPickQueryForm").serializeArray(), 
+        function(data) 
+        {
+            checklogin(data);
+            $('#tablediv').html('');
+					if(data.rows.length==0)
+                    {
+						$('#tablediv').html('<div class="line-div clear"><div class="title-div">'+
+								'没有符合条件的信息'+
+							'</div></div><hr/>');
+                        $('#firstPickConfirmBtn').css('display','none');
+                        document.getElementById("totalpagenospan").innerHTML='0';
+						document.getElementById("pagenospan").innerHTML='0';
+						btnctrl();
+						return;
+					}
+            $('#firstPickConfirmBtn').css('display','block');
+            var vt=parseInt(data.total);
+            vt=Math.ceil(vt/v_pageSize);
+            document.getElementById("totalpagenospan").innerHTML=vt;
+            if(v_pageNo>parseInt(data.total))
+            {
+                document.getElementById("pagenospan").innerHTML=vt;
+            }
+            else
+            {
+                document.getElementById("pagenospan").innerHTML=v_pageNo;
+            }
+            var str='<table class="table table-striped table-condensed" id="firstPickTable">';
+                $.each( data.rows, function(i, row)
+                {
+                //$('#qty_firstpick_stock_no').val(row['stock_no']);
+                //$('#hidden_item_id').val(row['tid']);
+                $('#grid_no').val(row['shelf_location']);
+                $('#qry_order_id').val(row['order_id']);
+                str += '<tr>';
+                str += '<td>货号编号</td>';
+                str += '<td>'+(row['bar_code']!=undefined?row['bar_code']:'-')+'</td>';
+                str += '</tr>';
+                if($('#qty_firstpick_indi_type').val()!=1){
+                    str += '<tr>';
+                    str += '<td>商品名称</td>';
+                    str += '<td>'+(row['title_name']!=undefined?row['title_name']:'-')+'</td>';
+                    str += '</tr>';
+                }else{
+                    str += '<tr>';
+                    str += '<td>商品名称</td>';
+                    str += '<td>'+(row['item_name']!=undefined?row['item_name']:'-')+'</td>';
+                    str += '</tr>';
+                }
+                str += '<tr>';
+                str += '<td>规格</td>';
+                str += '<td>'+(row['t_model']!=undefined?row['t_model']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>单位</td>';
+                str += '<td>'+(row['unit']!=undefined?row['unit']:'-')+'</td>';
+                str += '</tr>';
+                if($('#qty_firstpick_indi_type').val()!=1){
+                    str += '<tr>';
+                    str += '<td>数量</td>';
+                    str += '<td>'+(row['done_num']!=undefined?row['done_num']:'-')+'</td>';
+                    str += '</tr>';
+                }else{
+                    str += '<tr>';
+                    str += '<td>数量</td>';
+                    str += '<td>'+(row['num']!=undefined?row['num']:'-')+'</td>';
+                    str += '</tr>';
+                }
+                str += '<tr>';
+                str += '<td>货架仓位</td>';
+                str += '<td>'+(row['grid_nov']!=undefined?row['grid_nov']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>状态</td>';
+                    if(row['status']=='0'){
+                        str += '<td id="status">未分拣</td>';
+                    }else if(row['status']=='1'){
+                        str += '<td id="status">已一次分拣</td>';
+                    }else if(row['status']=='2'){
+                        str += '<td id="status">已二次分拣</td>';
+                    }else if(row['status']=='3'){
+                        str += '<td id="status">已发货</td>';
+                    }   
+                str += '</tr>';
+                if($('#qty_firstpick_indi_type').val()!=1){
+                    str += '<tr>';
+                    str += '<td>订单编号</td>';
+                    str += '<td>'+(row['tid']!=undefined?row['tid']:'-')+'</td>';
+                    str += '</tr>';
+                }else{
+                    str += '<tr class="hidden">';
+                    str += '<td>订单编号</td>';
+                    str += '<td>'+(row['tid']!=undefined?row['tid']:'-')+'</td>';
+                    str += '</tr>';
+                }
+                str += '<tr class="hidden">';
+                str += '<td>货架仓位</td>';
+                str += '<td>'+(row['shelf_location']!=undefined?row['shelf_location']:'-')+'</td>';
+                str += '</tr>';
+                    if(row['status']!='0'){
+                        $('#firstPickConfirmBtn').addClass('disabled');
+                    }else{
+                        $('#firstPickConfirmBtn').removeClass('disabled');
+                    }
+                }); 
+                str += '</table>';
+                $('#tablediv').html(str);
+                btnctrl();
+            
+        });
+    }
+    function query4(){
+        $('#tablediv0').html('&nbsp;');
+            $.post(ctx()+'dynamicquery/queryList', 
+                {
+                    'bar_code':$('#qry_firstpick_item_code').val(),
+                    'module_id':120,
+                    'sql_where':'',
+                    'rows':30,
+                    'page':1
+                }, 
+                function(data) {
+                    checklogin(data);
+                    if(data.rows.length==0)
+                    {
+                        $('#query4').css('display','none');
+						return;
+					}
+                    $("#query4").css('display','block');
+                    $('#num1').html(data.rows[0]['ITEM_NAME']);
+                    $('#num2').html(data.rows[0]['ITEM_CODE']);
+                    $('#num3').html(data.rows[0]['BAR_CODE']);
+                    $('#num4').html(data.rows[0]['T_MODEL']);
+                    var str="";
+                    $.each( data.rows, function(i, row){
+                        str += '<tr>';
+                        str += '<td>'+row['BATCHNO']+'</td>';
+                        str += '<td>'+row['DONE_NUM']+'</td>';
+                        str += '</tr>';
+                    }); 
+                    $('#tablediv0').html(str);
+                    $('#qry_firstpick_item_code').val('');
+              });
+        }  
+    $(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            $('#qty_firstpick_stock_no').focus();
+        });
+    function keynext(){
+        if(event.keyCode=='13')
+            logisticsNoKeydown();
+    }
+    function logisticsNoKeydown(){
+			$('#qry_firstpick_item_code').val('');
+			$('#qry_firstpick_item_code').focus();
+		}
+    function keyback(){
+        if(event.keyCode=='13'&& $('#qry_firstpick_item_code').val()!=''){
+            if($('#qty_firstpick_stock_no').val()=='')
+            {
+                $('#query3').css('display','none');
+                query4();
+            }
+            else{  
+                $('#query4').css('display','none');
+                query3();
+            
+            }
+        }
+    }
+    function confirmFirstPick(){
+        var v_indi_type='1';
+        if($('#qty_firstpick_stock_no').val().substr(0,1)!='1'){
+            v_indi_type='2';
+        }
+        $.post(ctx()+'stockout/confirmFirstPick',{'stock_no':$('#qty_firstpick_stock_no').val(),'item_id':$('#hidden_item_id').val(),'grid_no':$('#grid_no').val(),'order_id':$('#qry_order_id').val(),'indi_type':v_indi_type},function(data){
+            if(data.code== 'fail'){
+            	playErrorAudio();
+                my_alert('分拣失败');
+                return false;
+            }else{
+             	playSuccessAudio();
+                $('#tablediv').html('');
+                $('#qry_firstpick_item_code').val('');
+                $('#qry_firstpick_item_code').focus();
+                $('#firstPickConfirmBtn').css('display','none');
+                $('#page_display').css('display','none');
+            }
+        });
+    }
+	$(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    });
+   
+</script>
+
+</body>
+</html>			

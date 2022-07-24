@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <title>主页</title>
+
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script type="text/javascript" src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+      <style>
+          .sel-title{
+              font-family: '微软雅黑', 'Microsoft YaHei', Arial, Helvetica, sans-serif;
+              font-size: 24px;
+          }
+      </style>
+  </head>
+
+  <body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="main.html">WMS</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br><br><br>
+        <div class="col-xs-12">
+          <div class="todo">
+            <div class="todo-search">
+                <span class="sel-title">快捷菜单</span>
+                <!--<h5>菜单选择</h5>-->
+            </div>
+            <ul>
+              <li class="todo-done" onclick="location.href = '../gridallot/stocktaking.html';">
+                <div class="todo-icon fui-document"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>快捷盘点</strong>
+                  </h4>
+                  不用在pc端生成盘点任务，可以对任意货架直接盘点，并在pc端审核
+                </div>
+              </li>
+              <li onclick="location.href = '../stockout/loading.html';">
+                <div class="todo-icon fui-calendar-solid"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>装载业务</strong>
+                  </h4>
+                  用于出库流程托盘装载快递包裹
+                </div>
+              </li>
+              <li class="todo-done" onclick="location.href = '../assembly-line/binding.html';">
+                <div class="todo-icon fui-document"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>订单绑定</strong>
+                  </h4>
+                  绑定订单和料箱
+                </div>
+              </li>
+              <li onclick="location.href = '../assembly-line/turnoverbox.html';">
+                <div class="todo-icon fui-calendar-solid"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>周转箱</strong>
+                  </h4>
+                  除了可以将选中的周转箱释放外，还有新增、修改、删除功能
+                </div>
+              </li>
+              <li class="todo-done" onclick="location.href = '../assembly-line/exception-handling.html';">
+                <div class="todo-icon fui-document"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>异常查询</strong>
+                  </h4>
+                  可以根据快递单号查询异常原因、流转状态等
+                </div>
+              </li>
+              <li onclick="location.href = '../stockout/delivery.html';">
+                <div class="todo-icon fui-calendar-solid"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>快递单号查询</strong>
+                  </h4>
+                  可以根据快递单号查询商品名称、货架位等
+                </div>
+              </li>
+              <li class="todo-done" onclick="location.href = '../base/setting.html';">
+                <div class="todo-icon fui-link"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>设置</strong>
+                  </h4>
+                  可以修改自动登录、URL、登录密码等
+                </div>
+              </li>
+            </ul>
+          </div><!-- /.todo -->
+        </div><!-- /.col-xs-4 -->
+    <script> 
+		function onDeviceReady() {
+			playSuccessAudio();
+		}
+        $(function($) {
+        	if(!sessionStorage.getItem('menuul')){
+        		document.addEventListener("deviceready", onDeviceReady, false);
+	            $.post(ctx()+'webapp/getMenu',function(data) {
+	                checklogin(data);
+	                $("#menuul").html(data);
+	                sessionStorage.setItem('menuul',data);
+	            });
+        	}else{
+        		$("#menuul").html(sessionStorage.getItem('menuul'));
+        	}
+        });
+    </script>
+  </body>
+</html>

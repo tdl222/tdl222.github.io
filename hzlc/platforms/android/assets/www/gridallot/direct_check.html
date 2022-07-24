@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>直接盘点</title>
+<!-- Meta data -->
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{padding-top: 20px;
+        padding-bottom: 70px;}
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>直接盘点</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br/><br/>
+    <div id="afui"> 
+        <div id="content">
+            <form id="deliveryQueryForm" role="form">
+                <input type="text" class="hidden" name="aa" id="aa">
+                <input name="grid_no" id="check_grid" class="form-control" placeholder="货架位" onKeyDown="check_query0()"/>
+            </form>
+        </div>
+    </div>
+    <div id="check_query" style="display:none;" style="padding:10px;">
+    	<p id="item_name"></p>
+    	<table class="table table-striped" style="margin-top:-20px;">
+    		<thead>
+    			<tr><th>批次号</th><th>库存数</th><th>货架数量</th></tr>
+    		</thead>
+    		<tbody id="c_tbody"></tbody>
+    	</table>
+        <div class="pager-div navbar-fixed-bottom">
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>  
+        </div>
+	</div>
+	<!--盘点框-->
+	<div class="modal fade" id="checkModal" tabindex="-1" role="dialog" aria-labelledby="pickModalLabel" aria-hidden="true">
+	   <div class="modal-dialog">
+	      <div class="modal-content">
+	         <div class="modal-header">
+	            <button type="button" class="close" 
+	               data-dismiss="modal" aria-hidden="true">
+	                  &times;
+	            </button>
+	            <h6 class="modal-title" id="pickModalLabel">盘点信息</h6>
+	         </div>
+	         <div class="modal-body" id="check_tab">
+	           <table class="table table-striped">
+		           	<tr><td>批次号</td><td><div id="check_del"></div></td></tr>
+		           	<tr><td>货架位</td><td><div id="check_nov"></div></td></tr>
+		           	<tr><td>货架数量</td><td><div id="check_shelfQty"></div></td></tr>
+		           	<tr><td>盘点数</td><td><input class="form-control" id="check_num" /><td></tr>
+		           	<tr class="hidden"><td>grid_allot_id</td><td><div id="check_grid_allot_id"></div></td></tr>
+	           	</table>
+	         </div>
+	         <div class="modal-footer">
+	            <button id="num_click" type="button" class="btn btn-primary" data-dismiss="modal" onclick="num_confirm();">盘点</button>
+	            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	         </div>
+	      </div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+    <script>
+    </script>
+<script type="text/javascript">
+	var v_pageSize=10;
+	var v_pageNo=1;
+	function previous()
+    {
+        if($("#previousbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1)
+        {
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		check_query();
+	}
+	function next()
+    {
+        if($("#nextbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML))
+        {
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		check_query();
+	}
+    function check_query(){
+        $("#check_query").css('display','block');
+    	$.post(ctx()+'gridallot/queryList', 
+        {'page':v_pageNo,'rows':10,'grid_no':$('#check_grid').val()},
+        function(data){
+        	checklogin(data);
+        	$('#c_tbody').html('');
+					if(data.rows.length==0)
+                    {
+						$('#item_name').html($('#check_grid').val()+'：无相关信息');
+                    	$('#check_grid').val('');
+                    	$('.pager-div').css('display','none')
+						return;
+					}
+                $('.pager-div').css('display','block')
+	            var vt=parseInt(data.total);
+	            vt=Math.ceil(vt/v_pageSize);
+	            document.getElementById("totalpagenospan").innerHTML=vt;
+	            if(v_pageNo>parseInt(data.total))
+	            {
+	                document.getElementById("pagenospan").innerHTML=vt;
+	            }
+	            else
+	            {
+	                document.getElementById("pagenospan").innerHTML=v_pageNo;
+	            }
+	            $('#item_name').html(data.rows[0]['itemsRegi']['item_name']);
+	            var str = '';
+	            $.each(data.rows,function(i,row){
+	            	str += '<tr>';
+	            	str += '<td>'+row['batch_no']+'</td>';
+	            	str += '<td>'+row['cur_quan']+'</td>';
+	            	str += '<td>'+row['shelfQty']+'</td>';
+	            	str += '<td><input type="button" class="btn btn-primary btn-sm" value="盘点" onclick="check_tab()" data-toggle="modal" data-target="#checkModal"></td>';
+	            	str += '<td class="hidden">'+row['itemsRegi']['bar_code']+'</td>';
+	            	str += '<td class="hidden">'+row['grid_nov']+'</td>';
+	            	str += '<td class="hidden">'+row['shelfQty']+'</td>';
+	            	str += '<td class="hidden">'+row['grid_allot_id']+'</td>';
+	            	str += '<td class="hidden">'+row['batch_no']+'</td>';
+	            	str += '</tr>';
+	            });
+	            $('#c_tbody').html(str);
+	            btnctrl();
+        });
+    }
+    function check_tab(){
+    $(document).on("click","tbody tr",function(){
+            $.each($("tr"), function(i, v_tr){
+                $(v_tr).removeClass('tr-selected');
+            });
+            $(this).addClass('tr-selected');
+            $('#check_del').html($(this).children("td").eq(8).html());
+            $('#check_nov').html($(this).children("td").eq(5).html());
+            $('#check_shelfQty').html($(this).children("td").eq(6).html());
+            $('#check_grid_allot_id').html($(this).children("td").eq(7).html());
+        });
+        }
+    
+    $(document).ready(function($){
+        $("input").click(function(){
+                $(this).val('');
+        });
+    });
+    
+    function num_confirm(){
+    	if($('#check_num').val()==''){
+    		my_alert("请输入盘点数");
+    		return;
+    	}
+    	if(confirm("盘点数为"+$('#check_num').val())){
+    		check_check();
+    	}else{
+    		$('#check_num').val('');
+    	}
+    }
+    function check_query0(){
+    	if($('#check_grid').val().substr(0,1)=='T'){
+        		my_alert("临时区不能盘点！");
+        		$('#check_grid').val('');
+        		return;
+    	}
+    	if(event.keyCode=='13'&& $('#check_grid').val()!=''){
+    		v_pageNo=1;
+    		check_query();
+        }
+    }
+    
+    function check_check(){
+    	$.post(ctx() +'gridallot/directStocktaking',{'grid_allot_id':$('#check_grid_allot_id').html(),'qty_new':$('#check_num').val(),'qty_old':$('#check_shelfQty').html()},
+    	function(data){
+    		checklogin(data);
+    		if(data.code== 'true'){
+    			check_query();
+    			$('#check_num').val('');
+    			playSuccessAudio();
+    		}else{
+    			my_alert(data.mes);
+                playErrorAudio();
+    		}
+    	});
+    }
+    
+    $(function($) {
+        $("#menuul").html(sessionStorage.getItem('menuul'));
+        $("#check_grid").focus();
+    });
+
+
+</script>
+
+</body>
+</html>			

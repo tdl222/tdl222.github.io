@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <link href="../bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            padding-top: 70px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    </style>
+<title>直接上架</title>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>直接上架</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+	<div id="content">
+	    <form role="form" id="di_shelf_form">
+	    	<input type="hidden" name="page" value="1">
+	    	<input type="hidden" name="page" value="50">
+	    	<input  class="hidden" type="text" name="hidden_value" value="">
+	        <input id="di_bar_code" class="form-control" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='') query()" placeholder="条形码" style="margin-bottom:10px;"/>
+	    </form>
+	    <div id="query0" style="display:none;">
+	    	<div id="no_data" style="display:none;">
+	    		<table class="table table-striped">
+	    			<tr><td>    </td><td>没有相关订单</td></tr>
+	    		</table>
+	    	</div>
+	    	<div id="query00" style="display:none;">
+	    		批次号：<select id="di_decl_no" class="form-control select select-default" data-toggle="select" onchange="query01()"></select>
+		    	<div id="query1" style="display:none;">
+			    	入库号：<select id="sel" class="form-control select select-default" data-toggle="select" onchange="query02()"></select>
+			    	<div id="query2" style="display:none;">
+			    		<table class="table table-striped">
+			    			<tr><td>商品名称</td><td><div id="num1"></div></td></tr>
+			    			<tr><td>货&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号</td><td><div id="num2"></div></td></tr>
+			    			<tr><td>未上架数量</td><td><div id="num3"></div></td></tr>
+			    			<tr class="hidden"><td>GOOD_QTY</td><td><div id="num4"></div></td></tr>
+			    			<tr class="hidden"><td>STATUS2_QTY</td><td><div id="num5"></div></td></tr>
+			    			<tr><td>货&nbsp;架&nbsp;&nbsp;位</td><td><input type="text" name="gridno" id="num6" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='')$('#num7').focus()"></td></tr>
+			    			<tr><td>数&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;量</td><td>
+			    			<input id="num7" name="qty" maxlength="5" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" onKeyDown="if(event.keyCode=='13'&& $(this).val()!='') directShelve()"/>
+			    			</td></tr>
+			    		</table>
+			    		<button class="btn btn-lg btn-primary btn-block disabled" onclick="directShelve()" id="dirct_shelf_btn">上架</button>
+			        	<div style="margin:300px;"> </div>
+			    	</div>
+		    	</div>
+	    	</div>
+	    </div>
+	</div>
+
+    <script>
+    	$(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+            $('#di_bar_code').focus();
+        });
+        function query(){
+        	$('#query0').css('display','none');
+        	query00();
+        }
+    	function query00(){
+    		$('#query0').css('display','block');
+    		$.post(ctx() + 'stockinitem/queryList',{'rows':50,'page':1,'item.item_code':$('#di_bar_code').val(),'myConditions':"(t.good_qty - t.status2_qty > 0 or t.status2_qty is null) and (t.status = '04' or (t.status = '05' and t.updator = '"+sessionStorage.getItem("user_cd")+"'))"},
+    		function(data){
+    			checklogin(data);
+    			$('#di_decl_no').empty();
+    			if(data.rows.length==0){
+    				$('#no_data').css('display','block');
+    				$('#query00').css('display','none');
+    				return;
+    			}
+    			$('#no_data').css('display','none');
+    			$('#query00').css('display','block');
+                $.each(data.rows,function(n,row)
+                {
+                    $("#di_decl_no").append("<option value='"+row['declno']+"' >"+row['declno']+"</option>");
+                });
+                selun();
+                $("#di_decl_no").val($('#di_decl_no option:first').val()); 
+                $('[data-toggle="select"]').select2();
+                query01();
+    		});
+    	}
+    	function query01(){
+    		$('#query1').css('display','none');
+    		$.post(ctx() + 'stockinitem/queryList',{'declno':$("#di_decl_no").val(),'rows':50,'page':1,'item.item_code':$('#di_bar_code').val(),'myConditions':"(t.good_qty - t.status2_qty > 0 or t.status2_qty is null) and (t.status = '04' or (t.status = '05' and t.updator = '"+sessionStorage.getItem("user_cd")+"'))"},
+    			function(data){
+    			checklogin(data);
+    			$('#sel').empty();
+    			if(data.rows.length==0){
+    				$('#no_data').css('display','block');
+    				$('#query1').css('display','none');
+    				return;
+    			}
+    			$('#no_data').css('display','none');
+    			$('#query1').css('display','block');
+                $.each(data.rows,function(n,row)
+                {
+                    $("#sel").append("<option value='"+row['stockin_no']+"' >"+row['stockin_no']+"</option>");
+                });
+                selun();
+                $("#sel").val($('#sel option:first').val()); 
+                $('[data-toggle="select"]').select2();
+                query02();
+    		});
+    	}
+    	function query02(){
+    		$('#num6').val('');
+    		$('#num7').val('');
+    		$.post(ctx() + 'stockinitem/queryList',{'rows':1,'page':1,'item.item_code':$('#di_bar_code').val(),'declno':$('#di_decl_no').val(),'stockin_no':$('#sel').val(),'myConditions':"(t.good_qty - t.status2_qty > 0 or t.status2_qty is null) and (t.status = '04' or (t.status = '05' and t.updator = '"+sessionStorage.getItem("user_cd")+"'))"},
+    		function(data){
+    			checklogin(data);
+    			if(data.rows.length==0){
+    				$('#no_data').css('display','block');
+    				$('#query2').css('display','none');
+    				return;
+    			}
+    			$('#no_data').css('display','none');
+    			$('#query2').css('display','block');
+    			$('#num1').html(data.rows[0].item_name);
+    			$('#num2').html(data.rows[0].bar_code);
+    			$('#num4').html(data.rows[0].good_qty);
+    			$('#num5').html(data.rows[0].status2_qty);
+    			$('#num3').html(parseInt(data.rows[0].good_qty)-parseInt(data.rows[0].status2_qty==null?'0':data.rows[0].status2_qty));
+    			if(parseInt($('#num3').html())>0){
+    				$('#dirct_shelf_btn').removeClass('disabled');
+    				$('#num6').focus()
+    			}else{
+    			 	$('#dirct_shelf_btn').addClass('disabled');
+    			}
+    		});
+    	}
+        $(document).ready(function(){
+	    	$("input").click(function(){
+	    		$(this).select();
+	    	});
+	    });
+	    function selun(){
+			$("select option").each(function() {
+				text = $(this).text();
+				if($("select option:contains("+text+")").length > 1)
+					$("select option:contains("+text+"):gt(0)").remove();		
+			});
+	    }
+
+        function directShelve(){
+        	if(!$('#num6').val()){
+        		my_alert('请输入货架位');
+                return;
+        	}
+        	if(!$('#num7').val()||parseInt($('#num7').val())<1){
+        		my_alert('请输入上架数量');
+                return;
+        	}
+            $.post(
+                ctx() + 'stockinindicate/directShelve',
+                {
+                    'barcode':$('#num2').html(),
+                    'batchno':$('#di_decl_no').val(),
+                    'stockinno':$('#sel').val(),
+                    'gridno':$('#num6').val(),
+                    'qty':$('#num7').val(),
+                    'wh_code':localStorage.getItem("wh_code")
+                },
+                function(data){
+                    if(data.code=='true'){
+                        playSuccessAudio();
+                        query00();
+                    }else{
+                    	playErrorAudio();
+                        my_alert(data.mes);
+                        return;
+                    }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <title>主页</title>
+
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script type="text/javascript" src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+      <style>
+          .sel-title{
+              font-family: '微软雅黑', 'Microsoft YaHei', Arial, Helvetica, sans-serif;
+              font-size: 24px;
+          }
+      </style>
+  </head>
+
+  <body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="main.html">武川WMS</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+      
+      <br><br><br>
+        <div class="col-xs-12">
+          <div class="todo">
+            <div class="todo-search">
+                <span class="sel-title">快捷菜单</span>
+                <!--<h5>菜单选择</h5>-->
+            </div>
+            <ul>
+              <!--<li class="todo-done" onclick="location.href = '../gridallot/grid_shelf.html';">
+                <div class="todo-icon fui-window"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>测试</strong>
+                  </h4>
+                  根据货架位和一次分拣时间段来查询拣货数量
+                </div>
+              </li>-->
+              <li class="todo-done" onclick="location.href = '../stockout/pick_query1.html';" hidden>
+                <div class="todo-icon fui-window"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>货架位查询</strong>
+                  </h4>
+                  根据货架位和一次分拣时间段来查询拣货数量
+                </div>
+              </li>
+              <li onclick="location.href = '../stockin/dirct_shelf.html';" hidden>
+                <div class="todo-icon fui-window"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>直接上架</strong>
+                  </h4>
+                  未指示时上架
+                </div>
+              </li>
+              <li onclick="location.href = '../stockin/count.html';">
+                <div class="todo-icon fui-window"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>清点登记</strong>
+                  </h4>
+                  可以在这个页面登记商品相关信息
+                </div>
+              </li>
+              <li class="todo-done" onclick="location.href = '../stockin/shelf.html';">
+                <div class="todo-icon fui-windows"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>物品上架</strong>
+                  </h4>
+                  指示成功时上架
+                </div>
+              </li>
+              <li class="todo-done" onclick="location.href = '../gridallot/move.html';" hidden>
+                <div class="todo-icon fui-document"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                     <strong>库内移动</strong>
+                  </h4>
+                  根据入库单号、条形码浏览并移动商品货架位
+                </div>
+              </li>
+              <li onclick="location.href = '../stockout/scnd_pick.html';">
+                <div class="todo-icon fui-windows"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>二次分拣</strong>
+                  </h4>
+                  过机前的面单复核功能，核对面单与货物是否一致
+                </div>
+              </li>
+              <li class="todo-done" onclick="location.href = '../base/setting.html';">
+                <div class="todo-icon fui-gear"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>设置</strong>
+                  </h4>
+                  可以修改自动登录、URL、登录密码等
+                </div>
+              </li>
+              <li onclick="location.href = '../base/aboutUs.html';">
+                <div class="todo-icon fui-link"></div>
+                <div class="todo-content">
+                  <h4 class="todo-name">
+                    <strong>关于我们</strong>
+                  </h4>
+                  可以了解《公司简介》、《发展理念》、《联系方式》等
+                </div>
+              </li>
+            </ul>
+          </div><!-- /.todo -->
+        </div><!-- /.col-xs-4 -->
+    <script> 
+		function onDeviceReady() {
+			playSuccessAudio();
+		}
+        $(function($) {
+        	if(!sessionStorage.getItem('menuul')){
+        		document.addEventListener("deviceready", onDeviceReady, false);
+	            $.post(ctx()+'webapp/getMenu',function(data) {
+	                checklogin(data);
+	                $("#menuul").html(data);
+	                sessionStorage.setItem('menuul',data);
+	            });
+        	}else{
+        		$("#menuul").html(sessionStorage.getItem('menuul'));
+        	}
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+    <title>商品管理</title>
+
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{padding-bottom: 70px;}
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+        .text_flow{
+            width: 230px; overflow: hidden;white-space: nowrap;text-overflow: ellipsis;
+        }
+        #update_btn{width:80%;padding:auto;}
+    </style>
+</head>
+<body style="margin-top:60px;">
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>商品管理</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="../base/setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+    <div id="afui"> 
+        <div id="content">
+            <form id="itemsregiQueryForm" role="form">
+                 <input type="hidden" name="page" id="page" value="1"/>
+                <input type="hidden" name="rows" id="rows" value="1"/>
+<label>电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;商：</label><select name="ebus_code" id="qry_gridallot_ebus_code" class="form-control select select-default text_flow" data-toggle="select"></select><br><br>
+                <label class="pull-left">条&nbsp;&nbsp;形&nbsp;&nbsp;&nbsp;&nbsp;码：</label><input name="item_code" id="qry_itemsregi_bar_code" style="width: 230px;height:40px;" class="form-control pull-left"  onchange="init_query()"/><br><br>
+                       
+                <label class="pull-left">商品名称：</label><input name="item_name" id="qry_itemsregi_item_name" style="width:230px;height:40px;" class="form-control pull-left"  onchange="init_query()"/>
+                <br><br>      
+                <label class="pull-left">规格型号：</label><input name="t_model" id="qry_itemsregi_t_model" style="width: 155px;height:40px;" onchange="init_query()" class="form-control pull-left" /> 
+                
+                <button type="button" class="btn btn-primary easyui-linkbutton" onClick="searchItemsRegiForm()" id="btnclick"><i class="fui-search"></i>查询</button>
+                       
+            </form>
+        </div>
+    </div>
+    <div id="query3" style="display:none;" style="padding:10">
+        <div class="table-div clear" id="tablediv">
+                     <!--动态显示部分-->
+        </div>
+		<input id="update_btn" type="button" class="btn btn-lg btn-primary" data-toggle="modal" data-target="#mymodal-data" value="更新"/>
+		<br>
+        <div class="modal" id="mymodal-data" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">更新商品信息</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="afui"> 
+                            <div id="content">
+                                <form id="itemsregiForm" role="form" method="post">
+                                    <div id="query2" style="padding:10">
+                                        <div class="table-div clear" id="tablediv1">
+                                            <table class="table table-striped">
+                                                <tr>
+                                                    <input type="hidden" name="item_id" id="add_itemsregi_item_id">
+                                                    <!--<td align="right">
+                                                        <label>品目分类：</label></td>
+                                                    <td>
+                                                        <select class="form-control select select-default lm" data-toggle="select" id="add_itemsregi_category_id" name="category_id"></select>    
+                                                    </td>-->
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">电商</td>
+                                                    <td>
+                                                        <select class="form-control select select-default" data-toggle="select" id="add_itemsregi_ebus_code" name="ebus_code"></select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right"><div style="width:30px;">货号</div></td>
+                                                    <td>
+                                                        <input name="bar_code" id="add_itemsregi_bar_code" style="width: 200px;height:40px;" class="form-control"/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">商品名称</td>
+                                                    <td>
+                                                        <input name="item_name" id="add_itemsregi_item_name" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">条码</td>
+                                                    <td>
+                                                        <input name="item_code" id="add_itemsregi_item_code" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">品牌</td>
+                                                    <td>
+                                                        <input name="brand" id="add_itemsregi_brand" style="width: 200px;height:40px;" class="form-control"/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">型号规格</td>
+                                                    <td>
+                                                        <input name="t_model" id="add_itemsregi_t_model" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">供应商</td>
+                                                    <td>
+                                                        </label><select class="form-control select select-default" data-toggle="select" id="add_itemsregi_supp_code" name="supp_code"></select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">颜色</td>
+                                                    <td>
+                                                        <input name="color" id="add_itemsregi_color" style="width: 200px;height:40px;" class="form-control"/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">色号</td>
+                                                    <td>
+                                                        <input name="color_no" id="add_itemsregi_color_no" style="width: 200px;height:40px;" class="form-control" /> 
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">单位</td>
+                                                    <td>
+                                                        <input name="unit" id="add_itemsregi_unit" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">单价</td>
+                                                    <td>
+                                                        <input name="price" id="add_itemsregi_price" style="width: 200px;height:40px;" class="form-control" maxlength="7" onKeyPress="if (event.keyCode < 48 || event.keyCode > 57) event.returnValue = false;"/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">体积</td>
+                                                    <td>
+                                                        <input name="t_cube" id="add_itemsregi_t_cube" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">重量</td>
+                                                    <td>
+                                                        <input name="t_weight" id="add_itemsregi_t_weight" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">包装</td>
+                                                    <td>
+                                                        <input name="packkey" id="add_itemsregi_packkey" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">别名</td>
+                                                    <td>
+                                                        <input name="short_name" id="add_itemsregi_short_name" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">净重</td>
+                                                    <td>
+                                                        <input name="packag_weight" id="add_itemsregi_packag_weight" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <!--<tr>
+                                                    <td align="right"><label>状态：</label></td>
+                                                    <td>
+                                                        <select class="form-control select select-default" data-toggle="select" name="status" id="add_itemsregi_status"></select> 
+                                                    </td>
+                                                </tr>-->
+                                                <tr>
+                                                    <td align="right">备注</td>
+                                                    <td>
+                                                        <input name="notes"  id="add_itemsregi_notes" style="width: 200px;height:40px;" class="form-control" />
+                                                    </td>
+                                                </tr>
+                                                <!--<tr>
+                                                    <td align="right">店铺</td>
+                                                    <td>
+                                                        <select class="form-control select select-default" data-toggle="select" name="account_id" id="add_itemsregi_account_id"></select>
+                                                    </td>
+                                                </tr>-->
+                                            </table>
+                                        </div>
+                                  
+                                   </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" onclick="updateSaveItemsRegi()" data-dismiss="modal">保存</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="clear()">取消</button>
+                                        </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="pager-div navbar-fixed-bottom" id="page_hide">
+            <ul class="pager" style="border:#1ABC9C solid 1px;">
+              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+              <div style="width:145px;padding-top:7px;float:left;">
+                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+              </div>
+
+              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+            </ul>  
+        </div>
+	</div>
+
+
+<script type="text/javascript">
+    
+    var v_pageSize=1;
+	var v_pageNo=1;
+    
+    function previous()
+    {
+        if($("#previousbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo-1;
+        if(v_pageNo<1)
+        {
+            v_pageNo=1;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		searchItemsRegiForm();
+	}
+	function next()
+    {
+        if($("#nextbtn").hasClass("disabled"))
+        {
+            return;
+        }
+        var pageNoEle=document.getElementById("pagenospan");
+		v_pageNo=parseInt(pageNoEle.innerHTML);
+		v_pageNo=v_pageNo+1;
+        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML))
+        {
+            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+        }
+		pageNoEle.innerHTML=v_pageNo;
+		searchItemsRegiForm();
+	}
+    btnctrl();
+    function searchItemsRegiForm()
+    {
+        displaynone();
+        $("#query3").css('min-width',"400px");
+        $("#query3").css('display','block');
+        $('#page').val(v_pageNo);
+        $(this).focus();
+        $.post(ctx()+'itemsregi/queryList', 
+        $("#itemsregiQueryForm").serializeArray(), 
+        function(data) 
+        {
+            checklogin(data);
+            $('#tablediv').html('');
+					if(data.rows.length==0)
+                    {
+						$('#page_hide').css('display','none');
+						$('#update_btn').css('display','none');
+						var t_str='<table class="table table-striped table-condensed" id="errorTable">';
+                            var row=data.rows[0];
+                            t_str += '<tr>';
+			                t_str += '<td>条形码:</td>';
+			                t_str += '<td>'+$('#qry_itemsregi_bar_code').val()+'</td>';
+			                t_str += '</tr>';
+			                t_str += '<tr>';
+			                t_str += '<td>商品名称:</td>';
+			                t_str += '<td>'+$('#qry_itemsregi_item_name').val()+'</td>';
+			                t_str += '</tr>';
+							t_str += '<tr>';
+			                t_str += '<td>规格型号:</td>';
+			                t_str += '<td>'+$('#qry_itemsregi_t_model').val()+'</td>';
+			                t_str += '</tr>';
+			                t_str += '<tr>';
+                            t_str += '<td>&nbsp;</td>';
+			                t_str += '<td>没有符合条件的信息</td>';
+			                t_str += '</tr>';
+			                t_str += '</table>';
+                		$('#tablediv').html(t_str);
+						return goods_clear();
+					}
+            $('#update_btn').css('display','block');
+            $('#page_hide').css('display','block');
+            var vt=parseInt(data.total);
+            vt=Math.ceil(vt/v_pageSize);
+            document.getElementById("totalpagenospan").innerHTML=vt;
+            if(v_pageNo>parseInt(data.total))
+            {
+                document.getElementById("pagenospan").innerHTML=vt;
+            }
+            else
+            {
+                document.getElementById("pagenospan").innerHTML=v_pageNo;
+            }
+            var str='<table class="table table-striped table-condensed" id="itemsregiTable">';
+                $.each( data.rows, function(i, row)
+                {
+                $('#add_itemsregi_item_id').val(row['item_id']);
+                str += '<tr>';
+                str += '<td><strong>序号</strong></td>';
+                str += '<td>'+(i+1+(v_pageNo-1)*v_pageSize)+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>品目分类</td>';
+			    str += '<td>'+(row['category_name']!=undefined?row['category_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>电商名称</td>';
+                str += '<td id="ds">'+(row['ebus_name']!=undefined?row['ebus_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>货号</td>';
+                str += '<td id="hh">'+(row['bar_code']!=undefined?row['bar_code']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>条形码</td>';
+                str += '<td>'+(row['item_code']!=undefined?row['item_code']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>商品名称</td>';
+                str += '<td>'+(row['item_name']!=undefined?row['item_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>品牌</td>';
+                str += '<td>'+(row['brand']!=undefined?row['brand']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>规格型号</td>';
+                str += '<td>'+(row['t_model']!=undefined?row['t_model']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>颜色</td>';
+                str += '<td>'+(row['color']!=undefined?row['color']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>色号</td>';
+                str += '<td>'+(row['color_no']!=undefined?row['color_no']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>单价</td>';
+                str += '<td>'+(row['price']!=undefined?row['price']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>毛重(千克)</td>';
+                str += '<td>'+(row['t_weight']!=undefined?row['t_weight']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>计量单位</td>';
+                str += '<td>'+(row['unit']!=undefined?row['unit']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>体积</td>';
+                str += '<td>'+(row['t_cube']!=undefined?row['t_cube']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>包装</td>';
+                str += '<td>'+(row['packkey']!=undefined?row['packkey']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>别名</td>';
+                str += '<td>'+(row['short_name']!=undefined?row['short_name']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>压缩比例</td>';
+                str += '<td>'+(row['comp_ratio']!=undefined?row['comp_ratio']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>包装材料</td>';
+                str += '<td>'+(row['packag_supplies']!=undefined?row['packag_supplies']:'-')+'</td>'; 
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>长</td>';
+                str += '<td>'+(row['t_long']!=undefined?row['t_long']:'-')+'</td>'; 
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>宽</td>';
+                str += '<td>'+(row['t_width']!=undefined?row['t_width']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr class="hidden">';
+                str += '<td>高</td>';
+                str += '<td>'+(row['t_high']!=undefined?row['t_high']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>净重</td>';
+                str += '<td>'+(row['packag_weight']!=undefined?row['packag_weight']:'-')+'</td>';
+                str += '</tr>';
+                str += '<tr>';
+                str += '<td>备注</td>';
+                str += '<td>'+(row['notes']!=undefined?row['notes']:'-')+'</td>';
+                str += '</tr>';
+                $('#add_itemsregi_item_name').val(row['item_name']);
+                $('#add_itemsregi_bar_code').val(row['bar_code']);
+                $('#add_itemsregi_item_code').val(row['item_code']);
+                $('#add_itemsregi_t_model').val(row['t_model']);
+                $('#add_itemsregi_unit').val(row['unit']);
+                $('#add_itemsregi_t_weight').val(row['t_weight']);
+                $('#add_itemsregi_packag_weight').val(row['packag_weight']);
+                $('#add_itemsregi_notes').val(row['notes']);
+                $('#add_itemsregi_ebus_code').val(row['ebus_code']);
+                $('[data-toggle="select"]').select2();
+                }); 
+                str += '</table>';
+                $('#tablediv').html(str);
+                btnctrl();
+                //goods_clear();
+        });
+    }
+    function goods_clear(){
+    	$('#qry_itemsregi_bar_code').val('');
+        $('#qry_itemsregi_item_name').val('');
+        $('#qry_itemsregi_t_model').val('');
+    }
+
+    function init_query()
+    
+    {
+        v_pageNo=1;
+        searchItemsRegiForm();
+    }
+    
+    function displaynone()
+    {
+        $("#query3").css('display','none'); 
+    }
+    $.ajax({ 
+				url : ctx()+'customer/allCustomer?cust_type=01',
+				dataType: 'json', 
+				success: function(jsonstr){
+					// 修改ajax返回的值
+                    $("#add_itemsregi_ebus_code").empty();
+                    $.each(jsonstr,function(n,value){
+                        //var option = $("<option>").val(value.cust_id).text(value.cust_name);
+                        //$("#ebsel").append(option);
+                        $("#add_itemsregi_ebus_code").append("<option value='"+value.cust_code+"' selected>"+value.cust_name+"</option>");
+                    });
+                    //$('#ebsel option:first').attr("selected",true);
+                    //$("#ebsel").get(0).selectedIndex=0;
+                    //$("#ebsel").val($('#ebsel option:first').val());
+				}
+     });
+    $.ajax({  
+                    url : ctx()+'customer/allCustomer?cust_type=03',
+                    dataType: 'json', 
+                    success: function(jsonstr){
+                        // 修改ajax返回的值
+                        $("#add_itemsregi_supp_code").empty();
+                        $.each(jsonstr,function(n,value){
+                            $("#add_itemsregi_supp_code").append("<option value='"+value.cust_code+"'>"+value.cust_name+"</option>");
+                        }); 
+                    }
+    });
+    /*$.ajax({ 
+                    url : ctx()+'account/selectAll?cust_code=',
+                    dataType: 'json', 
+                    success: function(jsonstr){
+                        // 修改ajax返回的值
+                        $("#add_itemsregi_account_id").empty();
+                        $.each(jsonstr,function(n,value){
+                            $("#add_itemsregi_account_id").append("<option value='"+value.account_id+"'>"+value.eb_nick+"</option>");
+                        }); 
+                    }
+    });*/
+    $.ajax
+    ({ 
+				url : ctx()+'customer/allCustomer?cust_type=01&user_cd=' + sessionStorage.getItem("user_cd"),
+				dataType: 'json', 
+				success: function(jsonstr)
+                {
+					// 修改ajax返回的值
+                    $("#qry_gridallot_ebus_code").empty();
+                    $.each(jsonstr,function(n,value)
+                    {
+                        $("#qry_gridallot_ebus_code").append("<option value='"+value.cust_code+"' >"+value.cust_name+"</option>");
+                    });
+                    $("#ebsel").val($('#ebsel option:first').val()); 
+                    $('[data-toggle="select"]').select2();
+				}
+    });
+    function updateSaveItemsRegi(){
+        if($('#add_itemsregi_bar_code').val()==''||$('#add_itemsregi_item_code').val()==''||$('#add_itemsregi_item_name').val()==''){
+            alert("货号、条形码、商品名称不能为空！");
+            return false;
+            }
+        $.ajax({
+            type :'post',
+            url :ctx()+"/itemsregi/update",
+            dataType :'json',
+            data:{"category_id":$('#add_itemsregi_category_id').val(),"ebus_code":$('#add_itemsregi_ebus_code').val(),
+                  "bar_code":$('#add_itemsregi_bar_code').val(),"item_name":$('#add_itemsregi_item_name').val(),
+                  "item_code":$('#add_itemsregi_item_code').val(),"brand":$('#add_itemsregi_brand').val(),
+                  "t_model":$('#add_itemsregi_t_model').val(),"supp_code":$('#add_itemsregi_supp_code').val(),
+                  "color":$('#add_itemsregi_color').val(),"color_no":$('#add_itemsregi_color_no').val(),
+                  "unit":$('#add_itemsregi_unit').val(),"price":$('#add_itemsregi_price').val(),
+                  "t_cube":$('#add_itemsregi_t_cube').val(),"t_weight":$('#add_itemsregi_t_weight').val(),
+                  "packkey":$('#add_itemsregi_packkey').val(),"short_name":$('#add_itemsregi_short_name').val(),
+                  "packag_weight":$('#add_itemsregi_packag_weight').val(),"status":$('#add_itemsregi_status').val(),
+                  "notes":$('#add_itemsregi_notes').val(),
+                "item_id":$('#add_itemsregi_item_id').val()},
+            success: function(data){
+                alert("更新成功");
+                $('#btnclick').click();
+            },
+            error: function(err){
+                alert("更新失败");
+            }
+        });
+        
+        $('#add_itemsregi_brand').val('');
+            $('#add_itemsregi_supp_code').val('');
+            $('#add_itemsregi_color').val('');
+            $('#add_itemsregi_color_no').val('');
+            $('#add_itemsregi_price').val('');
+            $('#add_itemsregi_t_cube').val('');
+            $('#add_itemsregi_packkey').val('');
+            $('#add_itemsregi_short_name').val('');
+            $('#add_itemsregi_account_id').val('');
+    }
+   $(document).ready(function(){
+    	$("input").click(function(){
+    		$(this).select();
+    	});
+    });
+   $(function($) {
+        $("#qry_itemsregi_bar_code").focus();
+       $("#menuul").html(sessionStorage.getItem('menuul'));
+    });
+</script>
+
+</body>
+</html>			

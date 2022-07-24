@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html><head>
+
+<!-- Meta data -->
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+
+    <!-- Loading Bootstrap -->
+    <link href="../Flat-UI-master/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <!-- Loading Flat UI -->
+    <link href="../Flat-UI-master/dist/css/flat-ui.css" rel="stylesheet">
+    <link href="../Flat-UI-master/docs/assets/css/demo.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Zebra_Dialog/public/css/default/zebra_dialog.css" type="text/css">
+    <link href="../bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+    <script src="../Flat-UI-master/dist/js/vendor/jquery.min.js"></script>
+    <script src="../Flat-UI-master/dist/js/flat-ui.min.js"></script>
+    <script src="../Flat-UI-master/docs/assets/js/application.js"></script>
+    <script src="../Zebra_Dialog/public/javascript/zebra_dialog.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+    <script src="../bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../cordova.js"></script>
+    <script src="../js/app.js"></script>
+    <style>
+        body{
+            padding-top: 70px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .pager-div{
+            width: 360px;
+            margin: auto;
+        }
+        .td_width{width: 100px;}
+    </style>
+<title>补货功能</title>
+</head>
+
+<body>
+          <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="../base/main.html"><span class="fui-arrow-left"></span>补货功能</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left" id="menuul">
+                <li id="setting-li"><a href="setting.html"><span class="fui-gear"></span>&nbsp;设置</a></li>
+                <li><a href="#" onClick="javascript:logout();"><span class="fui-exit"></span>&nbsp;退出</a></li>
+               </ul>
+            </div><!-- /.navbar-collapse -->
+          </nav><!-- /navbar -->
+	<div id="content">
+	    <form role="form" id="di_shelf_form">
+	    	<input type="hidden" name="page" value="1">
+	    	<input type="hidden" name="page" value="10">
+	    	<input type="hidden" id="item_id">
+	    	<input  class="hidden" type="text" name="hidden_value" value="">
+	    	<label>子仓：</label><select id="sub_wh_id" class="form-control select select-default" data-toggle="select" onchange="query()"></select>
+	    </form>
+	    <div id="query0">
+	    	<div id="query00">
+	    		<div id="query01" style="margin-bottom:200px;">
+	    			<table class="table table-striped" id="yuan_table">
+	    				<thead><tr>
+	    					<th> </th>
+	    					<th><div class="td_width">源库位</div></th><th><div class="td_width">商品名称</div></th>
+	    					<th>条形码</th>
+	    					</tr>
+		    			</thead>
+		    			<tbody id="data_body">
+		    			</tbody>
+	    			</table>
+	    		</div>
+	    		<div class="pager-div navbar-fixed-bottom">
+		            <ul class="pager" style="border:#1ABC9C solid 1px;">
+		              <li class="previous disabled" id="previousbtn" onClick="previous();"><a href="#">&larr; 上一页</a></li>
+		              <div style="width:145px;padding-top:7px;float:left;">
+		                  第<span id="pagenospan"><b:write property="pageNo"/></span>页/共<span id="totalpagenospan"></span>页  
+		              </div>
+		
+		              <li class="next" id="nextbtn" onClick="next();"><a href="#">下一页 &rarr;</a></li>
+		            </ul>  
+		        </div>
+	    	</div>
+	    </div>
+	</div>
+	<div class="modal fade" id="checkModal" tabindex="-1" role="dialog" aria-labelledby="checkModalLabel" aria-hidden="true">
+	   <div class="modal-dialog">
+	      <div class="modal-content">
+	         <div class="modal-header">
+	            <button type="button" class="close" 
+	               data-dismiss="modal" aria-hidden="true">
+	                  &times;
+	            </button>
+	            <h6 class="modal-title" id="checkModalLabel">补货信息</h6>
+	         </div>
+	         <div class="modal-body" id="checktab">
+	           <table class="table table-striped">
+	           	<tr><td>商品名称</td><td><div id="item_name"></div></td></tr>
+	           	<tr><td>货号</td><td><div id="bar_code"></div></td></tr>
+	           	<tr><td>条形码</td><td><div id="item_code"></div></td></tr>
+	           	<tr><td>补入货架位</td><td><div id="inGrid_nov"></div></td></tr>
+	           	<tr><td>补入数量</td><td><input class="form-control" id="in_num"></td></tr>
+	           	<tr class="hidden"><td>grid_allot_id</td><td><div id="inGrid_allot_id"></div></td></tr>
+	           	<tr class="hidden"><td>account_id</td><td><div id="inAccount_id"></div></td></tr>
+	           	<tr class="hidden"><td>fgrid_allot_id</td><td><div id="fgrid_allot_id"></div></td></tr>
+	           	<tr class="hidden"><td>fbatch_no</td><td><div id="fbatch_no"></div></td></tr>
+	           </table>
+	         </div>
+	         <div class="modal-footer">
+	         	<button type="button" id="buhuo" class="btn btn-primary" data-dismiss="modal" onclick="move();">补货</button>
+	            <button type="button" class="btn btn-default" data-dismiss="modal">返回</button>
+	         </div>
+	      </div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+
+    <script>
+    	$(function($) {
+            $("#menuul").html(sessionStorage.getItem('menuul'));
+                $.ajax({  
+	                    url : ctx()+'warehousesub/selectAll?',
+	                    dataType: 'json', 
+	                    success: function(jsonstr){
+	                        // 修改ajax返回的值
+	                        $("#sub_wh_id").empty();
+	                        $.each(jsonstr,function(n,value){
+	                            $("#sub_wh_id").append("<option value='"+value.wh_id+"'>"+value.wh_name+"</option>");
+	                        });
+		                    $("#sub_wh_id").val($('#sub_wh_id option:first').val()); 
+		                    $('[data-toggle="select"]').select2(); 
+	    					query();
+	                    }
+	    		});
+        });
+        
+        var v_pageSize=10;
+		var v_pageNo=1;
+	    
+	    function previous()
+	    {
+	        if($("#previousbtn").hasClass("disabled"))
+	        {
+	            return;
+	        }
+	        var pageNoEle=document.getElementById("pagenospan");
+			v_pageNo=parseInt(pageNoEle.innerHTML);
+			v_pageNo=v_pageNo-1;
+	        if(v_pageNo<1)
+	        {
+	            v_pageNo=1;
+	        }
+			pageNoEle.innerHTML=v_pageNo;
+			query00();
+		}
+		function next()
+	    {
+	        if($("#nextbtn").hasClass("disabled"))
+	        {
+	            return;
+	        }
+	        var pageNoEle=document.getElementById("pagenospan");
+			v_pageNo=parseInt(pageNoEle.innerHTML);
+			v_pageNo=v_pageNo+1;
+	        if(v_pageNo>parseInt(document.getElementById("totalpagenospan").innerHTML))
+	        {
+	            v_pageNo=document.getElementById("totalpagenospan").innerHTML;
+	        }
+			pageNoEle.innerHTML=v_pageNo;
+			query00();
+		}
+	    btnctrl();
+	    function query(){
+	    	v_pageNo=1;
+	    	query00();
+	    }
+    	function query00(){
+    		$.post(ctx() + 'gridallot/buHuoList',{'rows':10,'page':v_pageNo,'sub_wh_id':$('#sub_wh_id').val()},
+    		function(data){
+    			checklogin(data);
+    			if(data.rows.length==0){
+    				$('#data_body').html('没有相关订单');
+    				return;
+    			}
+    			var vt=parseInt(data.total);
+	            vt=Math.ceil(vt/v_pageSize);
+	            document.getElementById("totalpagenospan").innerHTML=vt;
+	            if(v_pageNo>parseInt(data.total))
+	            {
+	                document.getElementById("pagenospan").innerHTML=vt;
+	            }
+	            else
+	            {
+	                document.getElementById("pagenospan").innerHTML=v_pageNo;
+	            }
+    			var str ="";
+    			$.each(data.rows, function(i,row){
+    				str += '<tr>';
+    				str += '<td class="hidden">'+(i+1+(v_pageNo-1)*v_pageSize)+'</td>';
+    				str += '<td><input type="button" class="btn btn-primary btn-sm" value="补货" onclick="ff()" data-toggle="modal" data-target="#checkModal"></td>';
+    				str += '<td>'+(row['grid_nov'])+'</td>';
+    				str += '<td>'+(row['item_name'])+'</td>';
+    				str += '<td>'+(row['item_code'])+'</td>';
+    				str += '<td class="hidden">'+(row['cur_quan'])+'</td>';
+    				str += '<td class="hidden">'+(row['grid_allot_id'])+'</td>';
+    				str += '<td class="hidden">'+(row['batch_no'])+'</td>';
+    				str += '<td class="hidden">'+(row['itemsRegi']['item_id'])+'</td>';
+    				str += '<td class="hidden">'+(row['bar_code'])+'</td>';
+    				str += '</tr>';
+    			});
+    			$('#data_body').html(str);
+    		});
+    	}
+    	
+    	function ff(){
+	    $(document).on("click","#yuan_table tbody tr",function(){
+	        $.each($("tr"), function(i, v_tr){
+	            $(v_tr).removeClass('tr-selected');
+	        });
+	        $(this).addClass('tr-selected');
+	        $('#item_name').html($(this).children("td").eq(3).html());
+	        $('#bar_code').html($(this).children("td").eq(9).html());
+	        $('#item_code').html($(this).children("td").eq(4).html());
+	        $('#in_num').val($(this).children("td").eq(5).html());
+	        $('#item_id').val($(this).children("td").eq(8).html());
+	        $('#fgrid_allot_id').html($(this).children("td").eq(6).html());
+	        $('#fbatch_no').html($(this).children("td").eq(7).html());
+	        num0();
+        });
+	  }
+	  
+	  function num0(){
+	  	$.post(ctx() +'gridallot/huoWeiList',{'page':1,'rows':1,'itemsRegi.item_id':$('#item_id').val()}, 
+	  	function(data){
+	  		if(data.rows.length==0){
+	  			$('#buhuo').addClass('disabled');
+	  			return;
+	  		}
+	  		$('#buhuo').removeClass('disabled');
+	  		$('#inGrid_allot_id').html(data.rows[0]['grid_allot_id']);
+	  		$('#inAccount_id').html((data.rows[0]['account_id']==null?'0':data.rows[0]['account_id']));
+	  		$('#inGrid_nov').html(data.rows[0]['grid_nov']);
+	  	});
+	  }
+	  
+	  function move(){
+			$.post(ctx() + 'gridallotswitch/doswitch',
+				{
+					fgrid_id : $('#fgrid_allot_id').html(),
+					tgrid_id : $('#inGrid_allot_id').html(),
+					fbatch_no : $('#fbatch_no').html(),
+					tgrid_no : $('#inGrid_nov').html(),
+					wh_id : localStorage.getItem('wh_id'),
+					taccount_id : $('#inAccount_id').val(),
+					switchnum : $('#in_num').val(),
+					move_flag : 1
+				},
+				 function(data) {
+                    if(data.code=='true'){
+                    	query00();
+                        playSuccessAudio();
+                    }else{
+                    	playErrorAudio();
+                        my_alert(data.mes);
+                        return;
+                    }
+			}); 
+        }
+	  
+        $(document).ready(function(){
+	    	$("input").click(function(){
+	    		$(this).select();
+	    	});
+	    });
+    </script>
+</body>
+</html>
